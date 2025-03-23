@@ -11,8 +11,9 @@ class Buffer : public NoCopyable, std::enable_shared_from_this<Buffer> {
 public:
   explicit Buffer() = default;
   explicit Buffer(size_t total_size,
-    std::shared_ptr<DeviceAllocator> allocator = nullptr, void* ptr = nullptr,
-    bool ues_external = false);
+                  std::shared_ptr<DeviceAllocator> allocator = nullptr,
+                  void* ptr = nullptr,
+                  bool ues_external = false);
   virtual ~Buffer();
 
   bool allocate();

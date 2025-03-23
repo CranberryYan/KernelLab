@@ -5,8 +5,7 @@
 namespace base {
 CPUDeviceAllocator::CPUDeviceAllocator() :
   DeviceAllocator(DeviceType::kDeviceCPU) {
-    printf("enter here\n");
-  }
+}
 
 void* CPUDeviceAllocator::allocate(size_t total_size) const {
   if (!total_size) {

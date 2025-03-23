@@ -1,8 +1,8 @@
-#include <cuda_runtime_api.h>
-#include <glog/logging.h>
 #include <gtest/gtest.h>
-#include "base/buffer.h"
+#include <glog/logging.h>
+#include <cuda_runtime_api.h>
 #include "../utils.cuh"
+#include "base/buffer.h"
 
 TEST(test_buffer, allocate_cpu) {
   std::shared_ptr<base::CPUDeviceAllocator> alloc =

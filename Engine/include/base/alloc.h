@@ -23,12 +23,13 @@ public:
 
   virtual void* allocate(size_t total_size) const = 0;
 
-  virtual void memcpy(const void* src_ptr, void* dst_ptr, size_t total_size,
-    MemcpyKind memcpy_kind = MemcpyKind::kMemcpyCPU2CPU, void* stream = nullptr,
-    bool need_sync = false) const;
+  virtual void memcpy(const void* src_ptr, void* dst_ptr,
+                      size_t total_size,
+                      MemcpyKind memcpy_kind = MemcpyKind::kMemcpyCPU2CPU,
+                      void* stream = nullptr, bool need_sync = false) const;
 
   virtual void memset_zero(void* ptr, size_t total_size,
-    void* stream, bool need_sync = false);
+                           void* stream, bool need_sync = false);
 
 private:
   DeviceType device_type_ = DeviceType::kDeviceUnknown;
