@@ -120,17 +120,19 @@ T& Tensor::index(int64_t offset) {
   CHECK_LT(offset, this->size());
 
   // device检查
+  T* ptr_h = nullptr;
   if (this->device_type() == base::DeviceType::kDeviceCPU) {
     T& val = *(reinterpret_cast<T*>(buffer_->ptr()) + offset);
     return val;
   } else if (this->device_type() == base::DeviceType::kDeviceCUDA) {
-    T* ptr_h = reinterpret_cast<T*>(malloc(sizeof(T)));
+    ptr_h = reinterpret_cast<T*>(malloc(sizeof(T)));
     cudaMemcpy(ptr_h,
                reinterpret_cast<T*>(this->ptr<T>()) + offset,
                sizeof(T),
                cudaMemcpyDeviceToHost);
     return *ptr_h;
   }
+  return *ptr_h;
 }
 
 template <typename T>

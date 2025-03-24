@@ -227,6 +227,7 @@ std::vector<size_t> Tensor::strides() const {
 
 std::shared_ptr<base::Buffer> Tensor::get_buffer() const { return buffer_; }
 
+// 将传入的缓冲区(buffer)赋值给当前的Tensor对象(buffer_, 是该Tensor的成员变量)
 bool Tensor::assign(std::shared_ptr<base::Buffer> buffer) {
   if (!buffer) {
     LOG(ERROR) << "The buffer parameter in the assign function is null pointer!";
