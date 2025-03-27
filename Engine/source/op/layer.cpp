@@ -281,7 +281,7 @@ base::Status LayerParam::set_weight(int32_t idx,
   int64_t total_num = std::accumulate(dims.begin(), dims.end(),
     sizeof(float), std::multiplies<>());
   std::shared_ptr<base::Buffer> buffer =
-    std::make_shared<base::Buffer>(size, nullptr,
+    std::make_shared<base::Buffer>(total_num, nullptr,
       const_cast<void*>(weight_ptr), true);
 
   if (device_type != base::DeviceType::kDeviceUnknown) {
@@ -317,10 +317,8 @@ base::Status LayerParam::set_weight(int32_t idx,
   return base::error::Success();
 }
 
-
-
 void LayerParam::to_cuda() {
-  for (auto& weight : weights) {
+  for (auto& weight : weights_) {
     weight.to_cuda(cuda_config_ ? cuda_config_->stream : nullptr);
   }
   if (!scales_.is_empty()) {

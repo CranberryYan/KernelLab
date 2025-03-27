@@ -4,6 +4,7 @@
 #include <vector>
 #include <armadillo>
 #include <driver_types.h>
+#include <cuda_runtime_api.h>
 #include "base/base.h"
 #include "base/buffer.h"
 
@@ -149,7 +150,7 @@ const T& Tensor::index(int64_t offset) const {
   } else if (this->device_type() == base::DeviceType::kDeviceCUDA) {
     T* ptr_h = reinterpret_cast<T*>(malloc(sizeof(T)));
     cudaMemcpy(ptr_h,
-               reinterpret_cast<T*>(this->ptr<T>()) + offset,
+               reinterpret_cast<T*>(const_cast<T*>(this->ptr<T>())) + offset,
                sizeof(T),
                cudaMemcpyDeviceToHost);
     return *ptr_h;

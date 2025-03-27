@@ -13,7 +13,7 @@ aux_source_directory(../test/optimized DIR_TEST_OPTIMIZED)
 
 add_executable(test_llm ${DIR_TEST} ${DIR_TEST_CU} ${DIR_TEST_OP} ${DIR_TEST_OPTIMIZED} ${DIR_TEST_TENSOR} ${DIR_TEST_MODEL})
 
-#set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -G")
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -G")
 target_link_libraries(test_llm ${link_ext_lib})
 target_include_directories(test_llm PUBLIC ${glog_INCLUDE_DIR})
 target_include_directories(test_llm PUBLIC ${GTest_INCLUDE_DIR})

@@ -100,7 +100,7 @@ public:
                             base::DeviceType device_type,
                             base::DataType data_type) const;
 
-  base::Status Layer::check_tensor_with_dim(const tensor::Tensor& tensor,
+  base::Status check_tensor_with_dim(const tensor::Tensor& tensor,
                                             base::DeviceType device_type,
                                             base::DataType data_type,
                                             ...) const;
@@ -174,6 +174,8 @@ public:
                           base::DeviceType device_type =
                             base::DeviceType::kDeviceUnknown) override;
 
+  void to_cuda() override;
+
   void set_scales(const tensor::Tensor& scales);
   void set_group_size(int32_t group_size);
   int32_t get_scale_num() const;
@@ -182,7 +184,7 @@ protected:
   int32_t group_size_ = 0;
   bool is_quant_layer_ = false;
   tensor::Tensor scales_;
-  std::vector<tensor::Tensor> weights;
+  std::vector<tensor::Tensor> weights_;
 };
 } // namespace op
 #endif // ENGINE_INCLUDE_OP_LAYER_H_
