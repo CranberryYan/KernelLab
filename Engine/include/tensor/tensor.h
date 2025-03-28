@@ -54,6 +54,8 @@ public:
   template <typename T> T& index(int64_t offset);
   template <typename T> const T& index(int64_t offset) const;
 
+  template <typename T> bool set_value(T value, int64_t offset);
+
   int32_t get_dim(int32_t idx) const;
   const std::vector<int32_t>& dims() const;
 
@@ -128,7 +130,7 @@ T& Tensor::index(int64_t offset) {
   } else if (this->device_type() == base::DeviceType::kDeviceCUDA) {
     ptr_h = reinterpret_cast<T*>(malloc(sizeof(T)));
     cudaMemcpy(ptr_h,
-               reinterpret_cast<T*>(this->ptr<T>()) + offset,
+               reinterpret_cast<T*>(buffer_->ptr()) + offset,
                sizeof(T),
                cudaMemcpyDeviceToHost);
     return *ptr_h;
@@ -150,11 +152,31 @@ const T& Tensor::index(int64_t offset) const {
   } else if (this->device_type() == base::DeviceType::kDeviceCUDA) {
     T* ptr_h = reinterpret_cast<T*>(malloc(sizeof(T)));
     cudaMemcpy(ptr_h,
-               reinterpret_cast<T*>(const_cast<T*>(this->ptr<T>())) + offset,
+               reinterpret_cast<T*>(buffer_->ptr()) + offset,
                sizeof(T),
                cudaMemcpyDeviceToHost);
     return *ptr_h;
   }
 }
+
+template <typename T>
+bool Tensor::set_value(T value, int64_t offset) {
+  CHECK_GE(offset, 0);
+  CHECK_LT(offset, this->size());
+
+  if (this->device_type() == base::DeviceType::kDeviceCPU) {
+    *(reinterpret_cast<T*>(buffer_->ptr()) + offset) = value;
+    return true;
+  } else if (this->device_type() == base::DeviceType::kDeviceCUDA) {
+    cudaMemcpy(reinterpret_cast<T*>(buffer_->ptr()) + offset,
+               &value,
+               sizeof(T),
+               cudaMemcpyHostToDevice);
+    return true;
+  }
+
+  return false;
+}
+
 } // namespace tensor
 #endif // ENGINE_INCLUDE_TENSOR_H_
