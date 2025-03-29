@@ -1,3 +1,7 @@
 build/
 .vscode/
 doc/
+chat_q8.bin
+tokenizer.model
+test/log/
+ncu_log/

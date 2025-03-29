@@ -3,7 +3,7 @@
 
 namespace kernel {
 template <int32_t BLOCK_DIM>
-__global__ void row_rmsnorm_f32(float* in, float* weight, float* out,
+__global__ void rmsnorm_kernel(float* in, float* weight, float* out,
                                 int total_num, float eps) {
   const int tid = threadIdx.x;
   constexpr int vec_size = 4;
@@ -65,7 +65,7 @@ __global__ void row_rmsnorm_f32(float* in, float* weight, float* out,
 
 void rmsnorm_kernel_cu(const tensor::Tensor& input,
                        const tensor::Tensor& weight,
-                      tensor::Tensor& output, void* stream) {
+                       tensor::Tensor& output, void* stream) {
   CHECK(!input.is_empty());
   CHECK(!weight.is_empty());
   CHECK(!output.is_empty());
@@ -87,10 +87,10 @@ void rmsnorm_kernel_cu(const tensor::Tensor& input,
   constexpr int threads_num = 128;
   if (stream) {
     cudaStream_t stream_ = static_cast<cudaStream_t>(stream);
-    row_rmsnorm_f32<128><<<1, threads_num, 0, stream_>>>(
+    rmsnorm_kernel<128><<<1, threads_num, 0, stream_>>>(
       in_ptr, wei_ptr, out_ptr, size, eps);
   } else {
-    row_rmsnorm_f32<128><<<1, threads_num>>>(
+    rmsnorm_kernel<128><<<1, threads_num>>>(
       in_ptr, wei_ptr, out_ptr, size, eps);
   }
 }

@@ -5,16 +5,22 @@ namespace base {
 #define BigSize 1024 * 1024
 #define MaxFreeSize 1024 * 1024 * 1024
 
+#define DEBUG 0
+
 void* CUDADeviceAllocator::allocate(size_t total_size) const {
-  int id =  -1;
+  int id =  0;
   cudaError_t state = cudaGetDevice(&id); // 获取当前设备id
   CHECK(state == cudaSuccess);
   if (total_size > BigSize) {
     std::vector<CudaMemoryBuffer>& big_buffers = big_buffers_map_[id];
+#if DEBUG
+    printf("=============== enter here big_buffers_map_.size(): %ld\n",
+      big_buffers_map_.size());
+# endif
     // 优先使用已存在且未被占用的缓冲区
     //  big_buffers是否busy
-    //  big_buffers的total_size是否大于等于total_size
-    //  big_buffers的total_size - total_size是否小于BigSize(防止浪费)
+    //  big_buffers的total_size(src)是否大于等于total_size(dst)
+    //  big_buffers的total_size(src) - total_size(dst)是否小于BigSize(防止浪费)
     int sel_id = -1;
     for (int i = 0; i < big_buffers.size(); ++i) {
       if (!big_buffers[i].busy &&
@@ -27,13 +33,13 @@ void* CUDADeviceAllocator::allocate(size_t total_size) const {
         }
       }
     }
-    // 使用已存在的缓冲区
+    // 使用已存在的缓冲区(找到了符合要求的buffer)
     if (sel_id != -1) {
       big_buffers[sel_id].busy = true;
       return big_buffers[sel_id].data;
     }
 
-    // 分配新的缓冲区
+    // 分配新的缓冲区(没找到符合要求的buffer)
     void* ptr = nullptr;
     state = cudaMalloc(&ptr, total_size);
     if (cudaSuccess != state) {
@@ -46,11 +52,17 @@ void* CUDADeviceAllocator::allocate(size_t total_size) const {
       return nullptr;
     }
 
+    // 将新分配的buffer加入big_buffers
     // CudaMemoryBuffer(void* data, size_t total_size, bool busy)
     big_buffers.emplace_back(ptr, total_size, true);
     return ptr;
   } else {
     std::vector<CudaMemoryBuffer>& cuda_buffers = cuda_buffers_map_[id];
+#if DEBUG
+    printf("=============== enter here cuda_buffers_map_.size(): %ld\n",
+      cuda_buffers_map_.size());
+# endif
+
     for (int i = 0; i < cuda_buffers.size(); ++i) {
       // 使用已存在的缓冲区
       if (cuda_buffers[i].total_size >= total_size &&
@@ -61,7 +73,7 @@ void* CUDADeviceAllocator::allocate(size_t total_size) const {
       }
     }
 
-    // 自行分配新的缓冲区
+    // 自行分配新的缓冲区(没找到符合要求的buffer)
     void* ptr = nullptr;
     state = cudaMalloc(&ptr, total_size);
     if (cudaSuccess != state) {
@@ -73,7 +85,8 @@ void* CUDADeviceAllocator::allocate(size_t total_size) const {
       LOG(ERROR) << buf;
       return nullptr;
     }
-  
+
+    // 将新分配的buffer加入cuda_buffers
     cuda_buffers.emplace_back(ptr, total_size, true);
     return ptr;
   }

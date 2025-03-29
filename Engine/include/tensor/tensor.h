@@ -157,6 +157,11 @@ const T& Tensor::index(int64_t offset) const {
                cudaMemcpyDeviceToHost);
     return *ptr_h;
   }
+
+  // Return a default value or handle the error for unrecognized device types
+  LOG(FATAL) << "Unrecognized device type.";
+  static T default_value = -1.0f;
+  return default_value;
 }
 
 template <typename T>
