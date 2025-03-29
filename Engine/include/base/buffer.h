@@ -36,5 +36,4 @@ private:
   std::shared_ptr<DeviceAllocator> allocator_;
 };
 }  // namespace base
-
 #endif
