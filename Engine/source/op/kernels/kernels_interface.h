@@ -23,5 +23,20 @@ typedef void (*EmbeddingKernel)(const tensor::Tensor& input,
                                 tensor::Tensor& output,
                                 int32_t vocab_size, void* stream);
 EmbeddingKernel get_embedding_kernel(base::DeviceType device_type);
+
+typedef void (*MatmulKernel)(const tensor::Tensor& input,
+                             const tensor::Tensor& weight,
+                             tensor::Tensor& output,
+                             float scale,
+                             const CudaConfig* config);
+MatmulKernel get_matmul_kernel(base::DeviceType device_type);
+
+typedef void (*MatmulKernelQuant)(const tensor::Tensor& input,
+                                  const tensor::Tensor& weight,
+                                  tensor::Tensor& output,
+                                  int32_t group_size,
+                                  const tensor::Tensor& scale,
+                                  const CudaConfig* config);
+MatmulKernelQuant get_matmul_kernel_quant8(base::DeviceType device_type);
 } // namespace kernel
 #endif // KERNELS_INTERFACE_H
