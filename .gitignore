@@ -6,3 +6,4 @@ tokenizer.model
 test/log/
 ncu_log/
 log.txt
+lib/
