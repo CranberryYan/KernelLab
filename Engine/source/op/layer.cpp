@@ -49,32 +49,33 @@ Layer::Layer(base::DeviceType device_type,
              LayerType layer_type,
              std::string layer_name) :
   BaseLayer(device_type, layer_type,
-            base::DataType::kDataTypeFp32, std::move(layer_name)) { }
+            base::DataType::kDataTypeFp32,
+            std::move(layer_name)) { }
 
 base::Status Layer::init() { return base::error::Success(); }
 
 #if 1
-base::Status Layer::forward() { return base::error::FunctionNotImplement(""); }
+base::Status Layer::compute() { return base::error::FunctionNotImplement(""); }
 #endif
 
-base::Status Layer::forward(const tensor::Tensor& input1,
+base::Status Layer::compute(const tensor::Tensor& input1,
                             const tensor::Tensor& output1) {
   this->set_input(0, input1);
   this->set_output(0, output1);
-  return this->forward();
+  return this->compute();
 }
 
-base::Status Layer::forward(const tensor::Tensor& input1,
+base::Status Layer::compute(const tensor::Tensor& input1,
                             const tensor::Tensor& input2,
                             const tensor::Tensor& output1) {
   this->set_input(0, input1);
   this->set_input(1, input2);
 
   this->set_output(0, output1);
-  return this->forward();
+  return this->compute();
 }
 
-base::Status Layer::forward(const tensor::Tensor& input1,
+base::Status Layer::compute(const tensor::Tensor& input1,
                             const tensor::Tensor& input2,
                             const tensor::Tensor& input3,
                             const tensor::Tensor& output1) {
@@ -83,10 +84,10 @@ base::Status Layer::forward(const tensor::Tensor& input1,
   this->set_input(2, input3);
 
   this->set_output(0, output1);
-  return this->forward();
+  return this->compute();
 }
 
-base::Status Layer::forward(const tensor::Tensor& input1,
+base::Status Layer::compute(const tensor::Tensor& input1,
                             const tensor::Tensor& input2,
                             const tensor::Tensor& input3,
                             const tensor::Tensor& input4,
@@ -97,10 +98,10 @@ base::Status Layer::forward(const tensor::Tensor& input1,
   this->set_input(3, input4);
 
   this->set_output(0, output1);
-  return this->forward();
+  return this->compute();
 }
 
-base::Status Layer::forward(const tensor::Tensor& input1,
+base::Status Layer::compute(const tensor::Tensor& input1,
                             const tensor::Tensor& input2,
                             const tensor::Tensor& input3,
                             const tensor::Tensor& input4,
@@ -113,7 +114,7 @@ base::Status Layer::forward(const tensor::Tensor& input1,
   this->set_input(4, input5);
 
   this->set_output(0, output1);
-  return this->forward();
+  return this->compute();
 }
 
 base::Status Layer::check_tensor(const tensor::Tensor& tensor,
@@ -197,8 +198,8 @@ const tensor::Tensor& Layer::get_output(int32_t idx) const {
 
 // TODO
 #if 1
-base::Status Layer::check() const {
-  return base::error::FunctionNotImplement("The check function is not implement yet");
+base::Status Layer::checkArgs() const {
+  return base::error::FunctionNotImplement("The checkArgs function is not implement yet");
 }
 #endif
 
@@ -237,8 +238,7 @@ LayerParam::LayerParam(base::DeviceType device_type,
                        LayerType layer_type,
                        bool is_quant_layer,
                        std::string layer_name) :
-  Layer(device_type, layer_type,
-  std::move(layer_name)),
+  Layer(device_type, layer_type, std::move(layer_name)),
   is_quant_layer_(is_quant_layer) { }
 
 tensor::Tensor& LayerParam::get_weight(int32_t idx) {

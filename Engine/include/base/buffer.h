@@ -36,4 +36,4 @@ private:
   std::shared_ptr<DeviceAllocator> allocator_;
 };
 }  // namespace base
-#endif
+#endif // ENGINE_INCLUDE_BASE_BUFFER_H_

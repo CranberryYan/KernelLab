@@ -1,8 +1,8 @@
 #ifndef ENGINE_INCLUDE_TENSOR_H_
 #define ENGINE_INCLUDE_TENSOR_H_
+#include <cmath>
 #include <memory>
 #include <vector>
-#include <armadillo>
 #include <driver_types.h>
 #include <cuda_runtime_api.h>
 #include "base/base.h"

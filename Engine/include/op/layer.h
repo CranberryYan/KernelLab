@@ -32,26 +32,26 @@ public:
   LayerType layer_type() const;
 
   virtual base::Status init() = 0;
-  virtual base::Status forward() = 0;
-  virtual base::Status forward(const tensor::Tensor& input1,
+  virtual base::Status compute() = 0;
+  virtual base::Status compute(const tensor::Tensor& input1,
                                const tensor::Tensor& output1) = 0;
 
-  virtual base::Status forward(const tensor::Tensor& input1,
+  virtual base::Status compute(const tensor::Tensor& input1,
                                const tensor::Tensor& input2,
                                const tensor::Tensor& output1) = 0;
 
-  virtual base::Status forward(const tensor::Tensor& input1,
+  virtual base::Status compute(const tensor::Tensor& input1,
                                const tensor::Tensor& input2,
                                const tensor::Tensor& input3,
                                const tensor::Tensor& output1) = 0;
 
-  virtual base::Status forward(const tensor::Tensor& input1,
+  virtual base::Status compute(const tensor::Tensor& input1,
                                const tensor::Tensor& input2,
                                const tensor::Tensor& input3,
                                const tensor::Tensor& input4,
                                const tensor::Tensor& output1) = 0;
 
-  virtual base::Status forward(const tensor::Tensor& input1,
+  virtual base::Status compute(const tensor::Tensor& input1,
                                const tensor::Tensor& input2,
                                const tensor::Tensor& input3,
                                const tensor::Tensor& input4,
@@ -64,7 +64,7 @@ public:
   virtual size_t input_size() const = 0;
   virtual size_t output_size() const = 0;
 
-  virtual base::Status check() const = 0;
+  virtual base::Status checkArgs() const = 0;
 
   virtual tensor::Tensor& get_input(int32_t idx) = 0;
   virtual tensor::Tensor& get_output(int32_t idx) = 0;
@@ -105,29 +105,29 @@ public:
                                             base::DataType data_type,
                                             ...) const;
   
-  base::Status check() const override;
+  base::Status checkArgs() const override;
 
-  base::Status forward() override;
+  base::Status compute() override;
 
-  base::Status forward(const tensor::Tensor& input1,
+  base::Status compute(const tensor::Tensor& input1,
                        const tensor::Tensor& output1) override;
 
-  base::Status forward(const tensor::Tensor& input1,
+  base::Status compute(const tensor::Tensor& input1,
                        const tensor::Tensor& input2,
                        const tensor::Tensor& output1) override;
 
-  base::Status forward(const tensor::Tensor& input1,
+  base::Status compute(const tensor::Tensor& input1,
                        const tensor::Tensor& input2,
                        const tensor::Tensor& input3,
                        const tensor::Tensor& output1) override;
 
-  base::Status forward(const tensor::Tensor& input1,
+  base::Status compute(const tensor::Tensor& input1,
                        const tensor::Tensor& input2,
                        const tensor::Tensor& input3,
                        const tensor::Tensor& input4,
                        const tensor::Tensor& output1) override;
 
-  base::Status forward(const tensor::Tensor& input1,
+  base::Status compute(const tensor::Tensor& input1,
                        const tensor::Tensor& input2,
                        const tensor::Tensor& input3,
                        const tensor::Tensor& input4,
