@@ -38,5 +38,11 @@ typedef void (*MatmulKernelQuant)(const tensor::Tensor& input,
                                   const tensor::Tensor& scale,
                                   const CudaConfig* config);
 MatmulKernelQuant get_matmul_kernel_quant8(base::DeviceType device_type);
+
+typedef void (*SwigluKernel)(const tensor::Tensor& input1,
+                             const tensor::Tensor& input2,
+                             tensor::Tensor& output, void* stream);
+SwigluKernel get_swiglu_kernel(base::DeviceType device_type,
+                               void* stream = nullptr);
 } // namespace kernel
 #endif // KERNELS_INTERFACE_H
