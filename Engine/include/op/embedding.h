@@ -26,7 +26,7 @@ public:
   
   base::Status checkArgs() const override;
 
-  base::Status compute() override;
+  base::Status forward() override;
 
 private:
   int32_t dim_ = 0;

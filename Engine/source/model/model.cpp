@@ -3,8 +3,28 @@
 #include <sys/stat.h>
 #include "model/model.h"
 
-namespace model
-{
+namespace model {
+Model::Model(base::TokenizerType tokenizer_type,
+             base::ModelType model_type,
+             std::string token_path,
+             std::string model_path,
+             bool is_quant_model) :
+  tokenizer_type_(tokenizer_type),
+  model_type_(model_type),
+  token_path_(std::move(token_path)),
+  model_path_(std::move(model_path)),
+  is_quant_model_(is_quant_model) { }
+
+tensor::Tensor& get_buffer(ModelBufferType buffer_idx) {
+  CHECK_GT(buffers_.count(buffer_idx), 0) << int(buffer_idx);
+  return buffers_.at(buffer_idx);
+}
+
+const tensor::Tensor& get_buffer(ModelBufferType buffer_idx) const {
+  CHECK_GT(buffers_.count(buffer_idx), 0) << int(buffer_idx);
+  return buffers_.at(buffer_idx);
+}
+
 std::pair<tensor::Tensor, tensor::Tensor> Model::slice_kv_cache(
   int32_t layer_idx, int32_t token_pos) const {
   int32_t layer_offset = layer_idx * config_->seq_len_ * config_->kv_dim_;
@@ -30,5 +50,4 @@ std::pair<tensor::Tensor, tensor::Tensor> Model::slice_kv_cache(
 
   return {key, val};
 }
-
 } // namespace model

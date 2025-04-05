@@ -16,11 +16,26 @@ public:
                  std::string model_path,
                  bool is_quant_model);
 
+  virtual tensor::Tensor& get_buffer(ModelBufferType buffer_idx);
+  virtual const tensor::Tensor& get_buffer(ModelBufferType buffer_idx) const;
+
   virtual std::pair<tensor::Tensor, tensor::Tensor> slice_kv_cache(
     int32_t layer_idx, int32_t token_pos) const;
 
 protected:
+  int32_t group_size_ = 1;
+  bool is_quant_model_ = false;
   std::unique_ptr<TransformerConfig> config_;
+
+  std::string token_path_;
+  std::string model_path_;
+  std::unique_ptr<op::EncodeLayerBase> encode_layer_;
+  std::map<ModelBufferType, tensor::Tensor> buffers_;
+  std::unique_ptr<sampler::Sampler> sampler_;
+  std::shared_ptr<RawModelData> raw_model_data_;
+  base::DeviceType device_type_ = base::DeviceType::kDeviceUnknown;
+  base::ModelType model_type_ = base::ModelType::kModelTypeUnknown;
+  base::TokenizerType tokenizer_type_ = base::TokenizerType::kEncodeUnknown;
 }
 } // namespace mode 
 #endif // ENGINE_INCLUDE_MODEL_MODEL_H_

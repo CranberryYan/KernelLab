@@ -9,7 +9,7 @@ class VecAddLayer : public Layer {
 
   base::Status checkArgs() const override;
 
-  base::Status compute() override;
+  base::Status forward() override;
 };
 }  // namespace op
 #endif  // ENGINE_INCLUDE_OP_ADD_H_

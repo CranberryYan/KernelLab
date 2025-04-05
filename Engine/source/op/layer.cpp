@@ -55,27 +55,27 @@ Layer::Layer(base::DeviceType device_type,
 base::Status Layer::init() { return base::error::Success(); }
 
 #if 1
-base::Status Layer::compute() { return base::error::FunctionNotImplement(""); }
+base::Status Layer::forward() { return base::error::FunctionNotImplement(""); }
 #endif
 
-base::Status Layer::compute(const tensor::Tensor& input1,
+base::Status Layer::forward(const tensor::Tensor& input1,
                             const tensor::Tensor& output1) {
   this->set_input(0, input1);
   this->set_output(0, output1);
-  return this->compute();
+  return this->forward();
 }
 
-base::Status Layer::compute(const tensor::Tensor& input1,
+base::Status Layer::forward(const tensor::Tensor& input1,
                             const tensor::Tensor& input2,
                             const tensor::Tensor& output1) {
   this->set_input(0, input1);
   this->set_input(1, input2);
 
   this->set_output(0, output1);
-  return this->compute();
+  return this->forward();
 }
 
-base::Status Layer::compute(const tensor::Tensor& input1,
+base::Status Layer::forward(const tensor::Tensor& input1,
                             const tensor::Tensor& input2,
                             const tensor::Tensor& input3,
                             const tensor::Tensor& output1) {
@@ -84,10 +84,10 @@ base::Status Layer::compute(const tensor::Tensor& input1,
   this->set_input(2, input3);
 
   this->set_output(0, output1);
-  return this->compute();
+  return this->forward();
 }
 
-base::Status Layer::compute(const tensor::Tensor& input1,
+base::Status Layer::forward(const tensor::Tensor& input1,
                             const tensor::Tensor& input2,
                             const tensor::Tensor& input3,
                             const tensor::Tensor& input4,
@@ -98,10 +98,10 @@ base::Status Layer::compute(const tensor::Tensor& input1,
   this->set_input(3, input4);
 
   this->set_output(0, output1);
-  return this->compute();
+  return this->forward();
 }
 
-base::Status Layer::compute(const tensor::Tensor& input1,
+base::Status Layer::forward(const tensor::Tensor& input1,
                             const tensor::Tensor& input2,
                             const tensor::Tensor& input3,
                             const tensor::Tensor& input4,
@@ -114,7 +114,7 @@ base::Status Layer::compute(const tensor::Tensor& input1,
   this->set_input(4, input5);
 
   this->set_output(0, output1);
-  return this->compute();
+  return this->forward();
 }
 
 base::Status Layer::check_tensor(const tensor::Tensor& tensor,

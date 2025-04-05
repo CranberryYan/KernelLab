@@ -28,7 +28,7 @@ base::Status SwiGLULayer::checkArgs() const {
   return base::error::Success();
 }
 
-base::Status SwiGLULayer::compute() {
+base::Status SwiGLULayer::forward() {
   auto status = checkArgs();
   if (!status) {
     return status;

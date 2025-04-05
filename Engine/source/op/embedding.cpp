@@ -50,7 +50,7 @@ base::Status EmbeddingLayer::checkArgs() const {
   return base::error::Success();
 }
 
-base::Status EmbeddingLayer::compute() {
+base::Status EmbeddingLayer::forward() {
   base::Status status = checkArgs();
   if (!status) {
     return status;
