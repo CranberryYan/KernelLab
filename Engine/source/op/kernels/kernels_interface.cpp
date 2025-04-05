@@ -12,9 +12,12 @@
 #include "cuda/swiglu_kernel.cuh"
 #include "cpu/rope_kernel.h"
 #include "cuda/rope_kernel.cuh"
+#include "cpu/mha_kernel.h"
+#include "cuda/mha_kernel.cuh"
+#include "cpu/softmax_kernel.h"
+#include "cpu/scale_sum_kernel.h"
 
-namespace kernel
-{
+namespace kernel {
 RMSNormKernel get_rmsnorm_kernel(base::DeviceType device_type) {
   if (device_type == base::DeviceType::kDeviceCPU) {
     return rmsnorm_kernel_cpu;
@@ -78,9 +81,34 @@ RoPEKernel get_rope_kernel(base::DeviceType device_type) {
     return rope_kernel_cpu;
   } else if (device_type == base::DeviceType::kDeviceCUDA) {
     return rope_kernel_cu;
-  } else {
-    LOG(FATAL) << "Unknown device type for get a rope kernel.";
-    return nullptr;
   }
+  LOG(FATAL) << "Unknown device type for get a rope kernel.";
+  return nullptr;
+}
+
+MHAKernel get_mha_kernel(base::DeviceType device_type) {
+  if (device_type == base::DeviceType::kDeviceCPU) {
+    return mha_kernel;
+  } else if (device_type == base::DeviceType::kDeviceCUDA) {
+    return mha_kernel_cu;
+  }
+  LOG(FATAL) << "Unknown device type for get an mha kernel.";
+  return nullptr;
+}
+
+SoftmaxInplaceKernel get_softmax_kernel(base::DeviceType device_type) {
+  if (device_type == base::DeviceType::kDeviceCPU) {
+    return softmax_inplace_cpu;
+  }
+  LOG(FATAL) << "Unknown device type for get an softmax kernel.";
+  return nullptr;
+}
+
+ScaleSumKernel get_scale_sum_kernel(base::DeviceType device_type) {
+  if (device_type == base::DeviceType::kDeviceCPU) {
+    return scale_sum_kernel_cpu;
+  }
+  LOG(FATAL) << "Unknown device type for get a scale and reduce kernel.";
+  return nullptr;
 }
 } // namespace kernel
