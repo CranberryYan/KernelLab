@@ -74,5 +74,9 @@ typedef void (*ScaleSumKernel)(const tensor::Tensor& value,
                                int t, int size, int stride,
                                void* stream);
 ScaleSumKernel get_scale_sum_kernel(base::DeviceType device_type);
+
+typedef void (*ScaleKernel)(float scale,
+                            const tensor::Tensor& input, void* stream);
+ScaleKernel get_scale_kernel(base::DeviceType device_type);
 } // namespace kernel
 #endif // KERNELS_INTERFACE_H

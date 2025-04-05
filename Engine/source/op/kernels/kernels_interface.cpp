@@ -16,6 +16,7 @@
 #include "cuda/mha_kernel.cuh"
 #include "cpu/softmax_kernel.h"
 #include "cpu/scale_sum_kernel.h"
+#include "cpu/scale_kernel.h"
 
 namespace kernel {
 RMSNormKernel get_rmsnorm_kernel(base::DeviceType device_type) {
@@ -110,5 +111,14 @@ ScaleSumKernel get_scale_sum_kernel(base::DeviceType device_type) {
   }
   LOG(FATAL) << "Unknown device type for get a scale and reduce kernel.";
   return nullptr;
+}
+
+ScaleKernel get_scale_kernel(base::DeviceType device_type) {
+  if (device_type == base::DeviceType::kDeviceCPU) {
+    return scale_inplace_cpu;
+  } else {
+    LOG(FATAL) << "Unknown device type for get a rope kernel.";
+    return nullptr;
+  }
 }
 } // namespace kernel
