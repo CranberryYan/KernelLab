@@ -2,27 +2,6 @@
 #include "../kernels_interface.h"
 
 namespace kernel {
-  // q: [1, 1, 12](seq_len: 1)
-  // k: [1, 1, 12](seq_len: 1)
-  // v: [1, 1, 12](seq_len: 1)
-  // q被分为了[1, 1, head_num, head_size](head_num * head_size = 12)
-  // eg:
-  //  head_num: 3   head_size: 4
-  //  q: [[1, 2, 3, 4],
-  //      [2, 3, 4, 5],
-  //      [3, 4, 5, 6]]
-  //  k: [[1, 2, 3, 4],
-  //      [2, 3, 4, 5],
-  //      [3, 4, 5, 6]]
-  //  v: [[1, 2, 3, 4],
-  //      [2, 3, 4, 5],
-  //      [3, 4, 5, 6]]
-  //  当前的q为[1, head_size]
-  //  q_0: [1, 2, 3, 4]
-  //  正常是q*k^T
-  //  但是分头处理, 当前的q_0: [1, 4]会循环处理k_0到k_3: [1, 4]
-  //  得出1个(seq_len)标量 -> score: [1]
-  //  output: [1, 4]: score(标量) * value_tensor
 #define DEBUG 1
 void mha_kernel(int32_t pos, int32_t head_num,
                 int32_t layer_index, int32_t seq_len,
