@@ -9,13 +9,13 @@
 
 namespace model {
 void Llama2Model::attention_qkv(int32_t layer_idx,
-                                const tensor::Tensor& pos_tensor) {
+                                const tensor::Tensor& pos_tensor) const {
   CHECK(llama_layers_ != nullptr);
 
   // kv cache
   tensor::Tensor query = this->get_buffer(ModelBufferType::kQuery);
   int32_t pos = pos_tensor.index<int32_t>(0);
-  const std::pair<tensor::Tensor, tensor::Tensor>& [key, val] =
+  const auto &[key, val] =
     slice_kv_cache(layer_idx, pos);
 
   // query
@@ -24,8 +24,8 @@ void Llama2Model::attention_qkv(int32_t layer_idx,
   CHECK_NE(query_layer, nullptr)
     << "The query layer in the attention block is null pointer.";
 
-    tensor::Tensor rmsnorm_output = get_buffer(ModelBufferType::kOutputRMSNorm);
-    STATUS_CHECK(query_layer->forward(rmsnorm_output, query));
+  tensor::Tensor rmsnorm_output = get_buffer(ModelBufferType::kOutputRMSNorm);
+  STATUS_CHECK(query_layer->forward(rmsnorm_output, query));
 
   // key
   const std::shared_ptr<op::Layer> &key_layer =

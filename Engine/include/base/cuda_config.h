@@ -11,5 +11,5 @@ struct CudaConfig {
     }
   }
 };
-}  // namespace kernel
-#endif  // BLAS_HELPER_H
+} // namespace kernel
+#endif // BLAS_HELPER_H

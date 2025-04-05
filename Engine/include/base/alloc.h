@@ -95,4 +95,4 @@ private:
   static std::shared_ptr<CUDADeviceAllocator> instance;
 };
 } // namespace base
-#endif  // ENGINE_INCLUDE_BASE_ALLOC_H_
+#endif // ENGINE_INCLUDE_BASE_ALLOC_H_

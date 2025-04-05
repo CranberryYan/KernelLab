@@ -1,7 +1,7 @@
-#include "op/swiglu.h"
-#include "kernels/cpu/swiglu_kernel.h"
-#include "kernels/kernels_interface.h"
 #include "op/layer.h"
+#include "op/swiglu.h"
+#include "kernels/kernels_interface.h"
+
 namespace op {
 SwiGLULayer::SwiGLULayer(base::DeviceType device_type, int32_t hidden_dim)
     : Layer(device_type, op::LayerType::kLayerSwiGLU, "SwiGLU"), hidden_dim_(hidden_dim) {
@@ -43,4 +43,4 @@ base::Status SwiGLULayer::forward() {
                                           cuda_config_ ? cuda_config_->stream : nullptr);
   return base::error::Success();
 }
-}  // namespace op
+} // namespace op

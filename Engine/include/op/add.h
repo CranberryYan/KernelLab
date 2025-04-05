@@ -11,5 +11,5 @@ class VecAddLayer : public Layer {
 
   base::Status forward() override;
 };
-}  // namespace op
-#endif  // ENGINE_INCLUDE_OP_ADD_H_
+} // namespace op
+#endif // ENGINE_INCLUDE_OP_ADD_H_

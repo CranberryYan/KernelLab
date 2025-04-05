@@ -1,5 +1,6 @@
 #include "op/add.h"
 #include "kernels/kernels_interface.h"
+
 namespace op {
 VecAddLayer::VecAddLayer(base::DeviceType device_type)
     : Layer(device_type, LayerType::kLayerAdd, "Add") {
@@ -50,4 +51,4 @@ base::Status VecAddLayer::forward() {
 
   return base::error::Success();
 }
-}  // namespace op
+} // namespace op

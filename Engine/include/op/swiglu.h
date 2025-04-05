@@ -13,5 +13,5 @@ public:
 private:
   int32_t hidden_dim_ = 0;
 };
-}  // namespace op
-#endif  // LLAMA_INFER_INCLUDE_OP_SWIGLU_H_
+} // namespace op
+#endif // LLAMA_INFER_INCLUDE_OP_SWIGLU_H_

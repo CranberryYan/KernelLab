@@ -13,5 +13,5 @@ public:
 private:
   int32_t dim_ = 0;
 };
-}  // namespace op
-#endif  // ENGINE_INCLUDE_OP_RMSNORM_H_
+} // namespace op
+#endif // ENGINE_INCLUDE_OP_RMSNORM_H_

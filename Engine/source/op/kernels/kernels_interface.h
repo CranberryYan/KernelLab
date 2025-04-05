@@ -4,8 +4,7 @@
 #include <base/cuda_config.h>
 #include "tensor/tensor.h"
 
-namespace kernel
-{
+namespace kernel {
 typedef void (*RMSNormKernel)(const tensor::Tensor& input,
                               const tensor::Tensor& weight,
                               tensor::Tensor& output, void* stream);
@@ -48,7 +47,8 @@ SwigluKernel get_swiglu_kernel(base::DeviceType device_type,
 typedef void (*RoPEKernel)(int32_t dim, int32_t kv_dim, int32_t head_size,
                            const tensor::Tensor& input_q,
                            const tensor::Tensor& input_k,
-                           const tensor::Tensor& input_pos,const tensor::Tensor& sin_cache,
+                           const tensor::Tensor& input_pos,
+                           const tensor::Tensor& sin_cache,
                            const tensor::Tensor& cos_cache, void* stream);
 RoPEKernel get_rope_kernel(base::DeviceType device_type);
 } // namespace kernel

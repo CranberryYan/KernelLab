@@ -67,7 +67,7 @@ Status InvalidArgument(const std::string& err_msg) {
 Status KeyHasExits(const std::string& err_msg) {
   return Status{kKeyValueHasExist, err_msg};
 }
-}  // namespace error
+} // namespace error
 
 std::ostream& operator<<(std::ostream& os, const Status& x) {
   os << x.get_err_msg();

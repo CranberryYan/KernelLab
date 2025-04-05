@@ -1,10 +1,8 @@
 #include "op/layer.h"
 #include "op/embedding.h"
 #include "kernels/kernels_interface.h"
-#include "kernels/cpu/embedding_kernel.h"
 
-namespace op
-{
+namespace op {
 EmbeddingLayer::EmbeddingLayer(base::DeviceType device_type, int32_t dim,
                                int32_t seq_len, int32_t vocab_size) :
   dim_(dim), seq_len_(seq_len), vocab_size_(vocab_size),

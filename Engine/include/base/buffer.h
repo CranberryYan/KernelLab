@@ -35,5 +35,5 @@ private:
   DeviceType device_type_ = DeviceType::kDeviceUnknown;
   std::shared_ptr<DeviceAllocator> allocator_;
 };
-}  // namespace base
+} // namespace base
 #endif // ENGINE_INCLUDE_BASE_BUFFER_H_

@@ -14,4 +14,4 @@
 #define TICK(x)
 #define TOCK(x)
 #endif
-#endif  // ENGINE_INCLUDE_CLOCK_HPP_
+#endif // ENGINE_INCLUDE_CLOCK_HPP_

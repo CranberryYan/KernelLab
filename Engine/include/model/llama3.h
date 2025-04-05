@@ -7,6 +7,11 @@
 #include "op/embedding.h"
 namespace model {
 struct Llama2Layers {
+  std::shared_ptr<op::Layer> add_layer_;
+  std::shared_ptr<op::Layer> rope_layer_;
+  std::shared_ptr<op::Layer> swiglu_layer_;
+  std::shared_ptr<op::Layer> mha_layer_;
+
   // attention
   std::vector<std::shared_ptr<op::Layer>> wq_layers_;
   std::vector<std::shared_ptr<op::Layer>> wk_layers_;
@@ -14,11 +19,11 @@ struct Llama2Layers {
   std::vector<std::shared_ptr<op::Layer>> wo_layers_;
 
   void to_cuda(std::shared_ptr<kernel::CudaConfig> config);
-}
+};
 
 class Llama2Model : public Model {
 public:
-explicit LLama2Model(base::TokenizerType tokenizer_type,
+explicit Llama2Model(base::TokenizerType tokenizer_type,
                      std::string token_path,
                      std::string model_path,
                      bool is_quant_model);

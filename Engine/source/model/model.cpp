@@ -15,12 +15,12 @@ Model::Model(base::TokenizerType tokenizer_type,
   model_path_(std::move(model_path)),
   is_quant_model_(is_quant_model) { }
 
-tensor::Tensor& get_buffer(ModelBufferType buffer_idx) {
+tensor::Tensor& Model::get_buffer(ModelBufferType buffer_idx) {
   CHECK_GT(buffers_.count(buffer_idx), 0) << int(buffer_idx);
   return buffers_.at(buffer_idx);
 }
 
-const tensor::Tensor& get_buffer(ModelBufferType buffer_idx) const {
+const tensor::Tensor& Model::get_buffer(ModelBufferType buffer_idx) const {
   CHECK_GT(buffers_.count(buffer_idx), 0) << int(buffer_idx);
   return buffers_.at(buffer_idx);
 }

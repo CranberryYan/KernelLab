@@ -5,8 +5,7 @@
 #include <base/cuda_config.h>
 #include "op/layer.h"
 
-namespace op
-{
+namespace op {
 // BaseLayer
 BaseLayer::BaseLayer(base::DeviceType device_type,
                      LayerType layer_type,

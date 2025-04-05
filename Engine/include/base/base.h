@@ -136,4 +136,4 @@ Status InvalidArgument(const std::string& err_msg = "");
 
 std::ostream& operator<<(std::ostream& os, const Status& x);
 } // namespace base
-#endif  // ENGINE_INCLUDE_BASE_BASE_H_
+#endif // ENGINE_INCLUDE_BASE_BASE_H_

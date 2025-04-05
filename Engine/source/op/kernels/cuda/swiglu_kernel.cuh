@@ -1,6 +1,6 @@
 #ifndef SWIGLU_KERNEL_CU_CUH
 #define SWIGLU_KERNEL_CU_CUH
-#include <tensor/tensor.h>
+#include "tensor/tensor.h"
 
 namespace kernel {
 void swiglu_kernel_cu(const tensor::Tensor& input1,

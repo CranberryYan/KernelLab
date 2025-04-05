@@ -8,5 +8,5 @@ void matmul_kernel_cpu(const tensor::Tensor& input,
                        tensor::Tensor& output,
                        float scale = 1.f,
                        const CudaConfig* config = nullptr);
-}  // namespace kernel
-#endif  // MATMUL_KERNEL_CPU_H
+} // namespace kernel
+#endif // MATMUL_KERNEL_CPU_H
