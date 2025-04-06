@@ -5,8 +5,7 @@
 
 namespace op
 {
-struct EmbeddingOutput
-{
+struct EmbeddingOutput {
   explicit EmbeddingOutput(tensor::Tensor input_tokens,
                            tensor::Tensor input_embeddings,
                            tensor::Tensor input_token_num) :

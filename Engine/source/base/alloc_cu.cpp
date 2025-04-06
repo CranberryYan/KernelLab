@@ -27,6 +27,7 @@ void* CUDADeviceAllocator::allocate(size_t total_size) const {
           big_buffers[i].total_size >= total_size &&
           big_buffers[i].total_size - total_size < BigSize) {
         // 满足上述条件, 选择为缓冲区, 记录sel_id
+        // ||: sel_id == -1 满足后, 不会运行big_buffers[sel_id] -> 没有索引问题
         if (sel_id == -1 ||
           big_buffers[sel_id].total_size > big_buffers[i].total_size) {
           sel_id = i;
