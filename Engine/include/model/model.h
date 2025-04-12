@@ -49,7 +49,7 @@ public:
     int32_t layer_idx, int32_t token_pos) const;
 
   virtual op::EmbeddingOutput embedding(
-    const std::vector<int>& tokens) const = 0;
+    std::vector<int>& tokens) = 0;
 
   virtual tensor::Tensor fill_input(const tensor::Tensor& pos_tensor,
                                     const op::EmbeddingOutput& embedding_output,
@@ -57,7 +57,7 @@ public:
 
 protected:
   virtual base::Status insert_buffer(ModelBufferType buffer_idx,
-                                     const tensor::Tensor &tensor);
+                                     tensor::Tensor &tensor);
 
   virtual base::Status read_model_file();
 
@@ -65,7 +65,7 @@ protected:
 
   virtual base::Status gen_model_from_file();
 
-  virtual base::Status generate_model_infos(const ModelConfig& config) const;
+  virtual base::Status generate_model_infos(const ModelConfig &config) const;
 
   virtual int32_t post_processing(const tensor::Tensor& pos,
                                   bool is_prompt) const = 0;
@@ -86,6 +86,7 @@ protected:
   std::string model_path_;
   int32_t group_size_ = 1; // MHA
   bool is_quant_model_ = false;
+  std::unique_ptr<sampler::Sampler> sampler_;
   std::unique_ptr<TransformerConfig> config_;
   std::shared_ptr<RawModelData> raw_model_data_;
   std::unique_ptr<op::EncodeLayerBase> encode_layer_;

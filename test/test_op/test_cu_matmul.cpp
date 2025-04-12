@@ -5,7 +5,7 @@
 #include "base/buffer.h"
 #include "../source/op/kernels/kernels_interface.h"
 
-#if 0
+#if 1
 TEST(test_matmul_cu, matmul_Sgemv) {
   std::shared_ptr<base::CUDADeviceAllocator> alloc_cu =
     base::CUDADeviceAllocatorFactory::get_instance();
@@ -52,10 +52,10 @@ TEST(test_matmul_cu, matmul_Sgemv) {
 
   for (int i = 0; i < output_cpu.size(); ++i) {
     float diff = std::abs(
-      output_cpu.index<float>(i) - output_cu.index<float>(i));
+      output_cpu.at<float>(i) - output_cu.at<float>(i));
     if (diff > 1e-3) {
       printf("index: %d, CPU: %f, GPU: %f\n",
-        i, output_cpu.index<float>(i), output_cu.index<float>(i));
+        i, output_cpu.at<float>(i), output_cu.at<float>(i));
     }
   }
 }
@@ -106,10 +106,10 @@ TEST(test_matmul_cu, matmul_Sgemv_1) {
 
   for (int i = 0; i < output_cpu.size(); ++i) {
     float diff = std::abs(
-      output_cpu.index<float>(i) - output_cu.index<float>(i));
+      output_cpu.at<float>(i) - output_cu.at<float>(i));
     if (diff > 1e-3) {
       printf("index: %d, CPU: %f, GPU: %f\n",
-        i, output_cpu.index<float>(i), output_cu.index<float>(i));
+        i, output_cpu.at<float>(i), output_cu.at<float>(i));
     }
   }
 }

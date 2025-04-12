@@ -12,10 +12,10 @@
 namespace model {
 enum class ModelBufferType {
   kInputTokens = 0,
-  kInptEmbedding = 1,
+  kInputEmbeddings = 1,
   kOutputRMSNorm = 2,
   kKeyCache = 3,
-  kValueCache = 4,
+  kValCache = 4,
   kQuery = 5,
   kInputPos = 6,
   kScoreStorage = 7,

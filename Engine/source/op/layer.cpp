@@ -20,8 +20,7 @@ LayerType BaseLayer::layer_type() const { return layer_type_; }
 
 // TODO
 #if 1
-base::Status BaseLayer::set_weight(int32_t idx,
-                                    const tensor::Tensor& weight) {
+base::Status BaseLayer::set_weight(int32_t idx, const tensor::Tensor& weight) {
   return base::error::FunctionNotImplement();
 }
 

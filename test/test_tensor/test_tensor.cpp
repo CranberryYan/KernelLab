@@ -42,11 +42,11 @@ TEST(test_tensor, init2) {
   set_value_cu(t1.ptr<float>(), 256 * 4096, 1.0f);
   ASSERT_EQ(t1.is_empty(), false);
   ASSERT_EQ(t1.device_type(), base::DeviceType::kDeviceCUDA);
-  ASSERT_EQ(t1.index<float>(512), 1.0f);
+  ASSERT_EQ(t1.at<float>(512), 1.0f);
 
   t1.to_cpu();
   ASSERT_EQ(t1.device_type(), base::DeviceType::kDeviceCPU);
-  ASSERT_EQ(t1.index<float>(512), 1.0f);
+  ASSERT_EQ(t1.at<float>(512), 1.0f);
 }
 
 TEST(test_tensor, clone_cpu) {
@@ -55,7 +55,7 @@ TEST(test_tensor, clone_cpu) {
   tensor::Tensor t1_cpu(DataType::kDataTypeFp32, 32, 32, true, alloc_cpu);
   ASSERT_EQ(t1_cpu.is_empty(), false);
   for (int i = 0; i < 32 * 32; ++i) {
-    t1_cpu.index<float>(i) = 1.f;
+    t1_cpu.at<float>(i) = 1.f;
   }
 
   tensor::Tensor t2_cpu = t1_cpu.clone();

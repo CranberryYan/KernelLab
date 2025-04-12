@@ -8,7 +8,7 @@ namespace base {
 #define DEBUG 0
 
 void* CUDADeviceAllocator::allocate(size_t total_size) const {
-  int id =  0;
+  int id = -1;
   cudaError_t state = cudaGetDevice(&id); // 获取当前设备id
   CHECK(state == cudaSuccess);
   if (total_size > BigSize) {
@@ -81,8 +81,7 @@ void* CUDADeviceAllocator::allocate(size_t total_size) const {
       char buf[256];
       snprintf(buf, 256,
         "Error: CUDA error when allocating %lu MB memory! \
-          maybe there's no enough memory "
-        "left on device.", total_size >> 20);
+          maybe there's no enough memory left on device.", total_size >> 20);
       LOG(ERROR) << buf;
       return nullptr;
     }

@@ -5,7 +5,7 @@
 #include "base/buffer.h"
 #include "../source/op/kernels/kernels_interface.h"
 
-#if 0
+#if 1
 TEST(test_swiglu_cu, swiglu_nostream) {
   std::shared_ptr<base::CUDADeviceAllocator> alloc_cu =
     base::CUDADeviceAllocatorFactory::get_instance();
@@ -43,9 +43,9 @@ TEST(test_swiglu_cu, swiglu_nostream) {
                                                            nullptr);
 
   for (int i = 0; i < size; ++i) {
-    ASSERT_NEAR(output_cu.index<float>(i), output_cpu.index<float>(i), 1e-5f)
+    ASSERT_NEAR(output_cu.at<float>(i), output_cpu.at<float>(i), 1e-5f)
       << printf("index: %d, CPU: %f, GPU: %f\n",
-        i, output_cpu.index<float>(i), output_cu.index<float>(i));
+        i, output_cpu.at<float>(i), output_cu.at<float>(i));
   }
 }
 
@@ -88,9 +88,9 @@ TEST(test_swiglu_cu, swiglu_stream) {
                                                            stream);
 
   for (int i = 0; i < size; ++i) {
-    ASSERT_NEAR(output_cu.index<float>(i), output_cpu.index<float>(i), 1e-5f)
+    ASSERT_NEAR(output_cu.at<float>(i), output_cpu.at<float>(i), 1e-5f)
       << printf("index: %d, CPU: %f, GPU: %f\n",
-        i, output_cpu.index<float>(i), output_cu.index<float>(i));
+        i, output_cpu.at<float>(i), output_cu.at<float>(i));
   }
 }
 #endif

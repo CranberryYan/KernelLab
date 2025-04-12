@@ -68,9 +68,9 @@ TEST(test_rope_cu, rope_nostream) {
   cudaDeviceSynchronize();
 
   for (int32_t i = 0; i < dim; ++i) {
-    ASSERT_NEAR(input_k_cpu.index<float>(i), input_k_cu.index<float>(i), 1e-3f)
+    ASSERT_NEAR(input_k_cpu.at<float>(i), input_k_cu.at<float>(i), 1e-3f)
       << "ik: " << i;
-    ASSERT_NEAR(input_q_cpu.index<float>(i), input_q_cu.index<float>(i), 1e-3f)
+    ASSERT_NEAR(input_q_cpu.at<float>(i), input_q_cu.at<float>(i), 1e-3f)
       << "iq: " << i;
   }
 }
@@ -139,9 +139,9 @@ TEST(test_rope_cu, rope_stream) {
   cudaDeviceSynchronize();
 
   for (int32_t i = 0; i < dim; ++i) {
-    ASSERT_NEAR(input_k_cpu.index<float>(i), input_k_cu.index<float>(i), 1e-3f)
+    ASSERT_NEAR(input_k_cpu.at<float>(i), input_k_cu.at<float>(i), 1e-3f)
       << "ik: " << i;
-    ASSERT_NEAR(input_q_cpu.index<float>(i), input_q_cu.index<float>(i), 1e-3f)
+    ASSERT_NEAR(input_q_cpu.at<float>(i), input_q_cu.at<float>(i), 1e-3f)
       << "iq: " << i;
   }
 }

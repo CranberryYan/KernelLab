@@ -5,7 +5,7 @@
 #include "base/buffer.h"
 #include "../source/op/kernels/kernels_interface.h"
 
-#if 0
+#if 1
 TEST(test_rmsnorm_cu, rmsnorm_nostream) {
   std::shared_ptr<base::CUDADeviceAllocator> alloc_cu =
     base::CUDADeviceAllocatorFactory::get_instance();
@@ -45,9 +45,9 @@ TEST(test_rmsnorm_cu, rmsnorm_nostream) {
     (input_cu, weight_cu, output_cu, nullptr);
 
   for (int i = 0; i < total_num; ++i) {
-    ASSERT_NEAR(output_cu.index<float>(i), output_cpu.index<float>(i), 1e-3f)
+    ASSERT_NEAR(output_cu.at<float>(i), output_cpu.at<float>(i), 1e-3f)
       << printf("index: %d, CPU: %f, GPU: %f\n",
-        i, output_cpu.index<float>(i), output_cu.index<float>(i));
+        i, output_cpu.at<float>(i), output_cu.at<float>(i));
   }
 }
 
@@ -93,9 +93,9 @@ TEST(test_rmsnorm_cu, rmsnorm_stream) {
     (input_cu, weight_cu, output_cu, stream);
 
   for (int i = 0; i < total_num; ++i) {
-    ASSERT_NEAR(output_cu.index<float>(i), output_cpu.index<float>(i), 1e-3f)
+    ASSERT_NEAR(output_cu.at<float>(i), output_cpu.at<float>(i), 1e-3f)
       << printf("index: %d, CPU: %f, GPU: %f\n",
-        i, output_cpu.index<float>(i), output_cu.index<float>(i));
+        i, output_cpu.at<float>(i), output_cu.at<float>(i));
   }
 
   cudaStreamDestroy(stream);

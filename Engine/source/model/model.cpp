@@ -42,6 +42,9 @@ std::vector<int32_t> Model::encode(const std::string& sentence) const {
   return encode_layer_->encode(sentence);
 }
 
+// get_buffer:
+//  错误检查: CHECK_GT: 当前buffer_idx(key)对应val个数必须大于0
+//  返回: key所对应的val
 tensor::Tensor& Model::get_buffer(ModelBufferType buffer_idx) {
   CHECK_GT(buffers_.count(buffer_idx), 0) << int(buffer_idx);
   return buffers_.at(buffer_idx);
@@ -62,7 +65,7 @@ std::pair<tensor::Tensor, tensor::Tensor> Model::slice_kv_cache(
         get_buffer(ModelBufferType::kKeyCache).ptr<float>(cache_offset));
   float* val_cache_ptr =
       const_cast<float*>(
-        get_buffer(ModelBufferType::kValueCache).ptr<float>(cache_offset));
+        get_buffer(ModelBufferType::kValCache).ptr<float>(cache_offset));
 
   tensor::Tensor key(base::DataType::kDataTypeFp32,
                      config_->kv_dim_,
@@ -79,8 +82,8 @@ std::pair<tensor::Tensor, tensor::Tensor> Model::slice_kv_cache(
 }
 
 tensor::Tensor Model::fill_input(const tensor::Tensor& pos_tensor,
-                          const op::EmbeddingOutput& embedding_output,
-                          bool is_prompt) const {
+                                 const op::EmbeddingOutput& embedding_output,
+                                 bool is_prompt) const {
   const int32_t pos = pos_tensor.index<int32_t>(0);
   auto [input_tokens, input_embeddings, input_token_num] = embedding_output;
 
@@ -103,7 +106,7 @@ tensor::Tensor Model::fill_input(const tensor::Tensor& pos_tensor,
 }
 
 base::Status Model::insert_buffer(ModelBufferType buffer_idx,
-                                  const tensor::Tensor &tensor) {
+                                  tensor::Tensor &tensor) {
   if (buffers_.count(buffer_idx) > 0) {
     return base::error::KeyHasExits(
       std::to_string(int(buffer_idx)) + " has exits in the buffers");
@@ -115,6 +118,7 @@ base::Status Model::insert_buffer(ModelBufferType buffer_idx,
   }
 
   buffers_.insert({buffer_idx, tensor});
+
   return base::error::Success();
 }
 
@@ -136,7 +140,7 @@ base::Status Model::read_model_file() {
       "Failed to open the file. The path may be invalid.");
   }
 
-  struct model::ModelConfig config = ModelConfig();
+  auto config = ModelConfig();
 
   // 从 file 中读取 sizeof(ModelConfig) 大小的数据并存入 config
   if (fread(&config, sizeof(ModelConfig), 1, file) != 1) {
@@ -168,7 +172,6 @@ base::Status Model::read_model_file() {
     return base::error::ModelParseError(
         "Failed to retrieve the file size information from the model file.");
   }
-
 
   raw_model_data_->file_size = st.st_size;
   LOG(INFO) << "The tokenizer model path: " << token_path_;

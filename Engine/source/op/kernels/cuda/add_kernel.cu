@@ -6,7 +6,7 @@ __global__ void add_kernel(int32_t size,
                            const float* input1, const float* input2,
                            float* output) {
   int32_t gid = blockIdx.x * blockDim.x + threadIdx.x;
-  if (gid > size) { return; }
+  if (gid >= size) { return; }
   output[gid] = input1[gid] + input2[gid];
 }
 

@@ -12,8 +12,8 @@ __device__ void softmax_gpu(float* __restrict__ x, int size) {
   // scale_tensor: [1, head_num, 1, seq_len]
   // 需要找到head_num个max
   // 找到每个block中的max
-  float max_val = tid <= size ? x[tid] : -FLT_MAX;
-  for (int i = tid; i <= size; i += step) {
+  float max_val = tid < size ? x[tid] : -FLT_MAX;
+  for (int i = tid; i < size; i += step) {
     if (x[i] > max_val) {
       max_val = x[i];
     }
@@ -30,7 +30,7 @@ __device__ void softmax_gpu(float* __restrict__ x, int size) {
   max_val = shared_val;
 
   float sum = 0.0f;
-  for (int i = tid; i <= size; i += step) {
+  for (int i = tid; i < size; i += step) {
     x[i] = expf(x[i] - max_val);
     sum += x[i];
   }
@@ -42,7 +42,7 @@ __device__ void softmax_gpu(float* __restrict__ x, int size) {
   __syncthreads();
   sum = shared_val;
 
-  for (int i = tid; i <= size; i += step) {
+  for (int i = tid; i < size; i += step) {
     x[i] /= sum;
   }
 }
@@ -54,7 +54,7 @@ __global__ void multi_head_attention_kernel(
   int32_t kv_dim, int32_t kv_mul,
   int32_t head_num, int32_t head_size, int32_t layer_offset) {
   int head = blockIdx.x;
-  if (head > head_num) {
+  if (head >= head_num) {
     return;
   }
 
@@ -84,8 +84,9 @@ __global__ void multi_head_attention_kernel(
     score *= scale;
     score_head[t] = score;
   }
+  __syncthreads();
 
-  softmax_gpu(score_head, pos);
+  softmax_gpu(score_head, pos + 1);
   __syncthreads();
 
   float* output_head = output + head * head_size;

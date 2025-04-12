@@ -52,6 +52,9 @@ public:
   template <typename T> T* ptr(int64_t index);
   template <typename T> const T* ptr(int64_t index) const;
 
+  template <typename T> T& at(int64_t offset);
+  template <typename T> const T& at(int64_t offset) const;
+
   template <typename T> T& index(int64_t offset);
   template <typename T> const T& index(int64_t offset) const;
 
@@ -118,8 +121,22 @@ const T* Tensor::ptr(int64_t index) const {
 
 template <typename T>
 T& Tensor::index(int64_t offset) {
-  // 合法性检查
-  // 0 < offset < size
+  CHECK_GE(offset, 0);
+  CHECK_LT(offset, this->size());
+  T& val = *(reinterpret_cast<T*>(buffer_->ptr()) + offset);
+  return val;
+}
+
+template <typename T>
+const T& Tensor::index(int64_t offset) const {
+  CHECK_GE(offset, 0);
+  CHECK_LT(offset, this->size());
+  const T& val = *(reinterpret_cast<T*>(buffer_->ptr()) + offset);
+  return val;
+}
+
+template <typename T>
+T& Tensor::at(int64_t offset) {
   CHECK_GE(offset, 0);
   CHECK_LT(offset, this->size());
 
@@ -136,11 +153,15 @@ T& Tensor::index(int64_t offset) {
                cudaMemcpyDeviceToHost);
     return *ptr_h;
   }
-  return *ptr_h;
+
+  // Return a default value or handle the error for unrecognized device types
+  LOG(FATAL) << "Unrecognized device type.";
+  static T default_value = -1.0f;
+  return default_value;
 }
 
 template <typename T>
-const T& Tensor::index(int64_t offset) const {
+const T& Tensor::at(int64_t offset) const {
   // 合法性检查
   // 0 < offset < size
   CHECK_GE(offset, 0);
