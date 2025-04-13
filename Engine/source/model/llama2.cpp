@@ -3,7 +3,7 @@
 #include <cuda_runtime_api.h>
 #include <sentencepiece_processor.h>
 #include "base/tick.h"
-#include "model/llama3.h"
+#include "model/llama2.h"
 #include "op/mha.h"
 #include "op/rope.h"
 #include "op/matmul.h"

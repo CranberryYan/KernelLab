@@ -80,8 +80,12 @@ base::Status MatmulLayer::forward() {
   }
 
   if (has_bias_) {
+    para::add_para para;
+    para.ele_num = get_output(0).size();
+    para.thread_num = 1024;
+    para.block_num = (para.ele_num + para.thread_num - 1) / (para.thread_num * 4);
     kernel::get_add_kernel(device_type_)(
-      get_output(0), get_bias(0), get_output(0),
+      get_output(0), get_bias(0), get_output(0), para,
       cuda_config_ ? cuda_config_->stream : nullptr);
   }
 

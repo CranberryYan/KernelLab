@@ -1,7 +1,10 @@
+#include <cstdlib>
 #include "op/add.h"
 #include "kernels/kernels_interface.h"
 
 namespace op {
+static const bool apiTraceEnabled = (std::getenv("api_trace") != nullptr);
+
 VecAddLayer::VecAddLayer(base::DeviceType device_type)
     : Layer(device_type, LayerType::kLayerAdd, "Add") {
   reset_input_size(2);
@@ -31,23 +34,55 @@ base::Status VecAddLayer::checkArgs() const {
     return status;
   }
 
+  if (device_type_ == base::DeviceType::kDeviceCUDA) {
+    CHECK(cuda_config_ != nullptr);
+  }
+
   return base::error::Success();
 }
 
+base::Status VecAddLayer::compute() {
+  // printf("apiTraceEnabled: %d\n", apiTraceEnabled);
+  auto input1 = this->get_input(0);
+  auto input2 = this->get_input(1);
+  auto output = this->get_output(0);
+
+  para::add_para para;
+  para.ele_num = static_cast<int32_t>(input1.size());
+  para.thread_num = 1024;
+  para.block_num = (para.ele_num + para.thread_num - 1) / para.thread_num;
+
+  kernel::get_add_kernel(device_type_)(input1, input2, output, para,
+                                       cuda_config_ ?
+                                       cuda_config_->stream : nullptr);
+
+  return base::error::Success();
+}
+
+void print_tensor(std::string name, tensor::Tensor ten) {
+  printf("%s\n", name.c_str());
+  printf("dataType: %d\n", static_cast<int>(ten.device_type()));
+  for (int dim = 0; dim < ten.dims().size(); ++dim) {
+    printf("%s[%d]: %d\n", name.c_str(), dim, ten.get_dim(dim));
+  }
+}
+
 base::Status VecAddLayer::forward() {
+  if (apiTraceEnabled) {
+    printf("API_TRACE:\n");
+    printf("API_NAME: VecAddLayer::forward\n");
+    print_tensor("VecAddLayer.input1", this->get_input(0));
+  }
+
   auto status = this->checkArgs();
   if (!status) {
     return status;
   }
-  auto input1 = this->get_input(0);
-  auto input2 = this->get_input(1);
-  auto output = this->get_output(0);
-  if (device_type_ == base::DeviceType::kDeviceCUDA) {
-    CHECK(cuda_config_ != nullptr);
+
+  status = this->compute();
+  if (!status) {
+    return status;
   }
-  kernel::get_add_kernel(device_type_)(input1, input2, output,
-                                       cuda_config_ ?
-                                       cuda_config_->stream : nullptr);
 
   return base::error::Success();
 }

@@ -12,13 +12,14 @@ __global__ void embedding_kernel(int32_t vocab_size, int32_t token_num,
   // 每个token由一个block负责, hidden_units为128的一维向量,
   //  每个thread负责其中一个数
   int token_id = blockIdx.x;
-  if (token_id > token_num) {
+  if (token_id >= token_num) {
     return;
   }
 
   int32_t token = input_ptr[token_id];
-  if (token > vocab_size) {
-    printf("ERROR: token > vocab_size\n");
+  if (token >= vocab_size) {
+    printf("ERROR: vocab_size is %d, token is %d, token > vocab_size\n",
+      vocab_size, token);
     return;
   }
 

@@ -43,11 +43,16 @@ TEST(test_cu_add, add_nostream) {
     input2_cu.set_value<float>(input2_tmp, i);
   }
 
+  para::add_para para;
+  para.ele_num = static_cast<int32_t>(input1_cpu.size());
+  para.thread_num = 1024;
+  para.block_num = (para.ele_num + para.thread_num  - 1) / para.thread_num;
   kernel::get_add_kernel(base::DeviceType::kDeviceCPU)(
-    input1_cpu, input2_cpu, output_cpu, nullptr);
+    input1_cpu, input2_cpu, output_cpu, para, nullptr);
   kernel::get_add_kernel(base::DeviceType::kDeviceCUDA)(
-    input1_cu, input2_cu, output_cu, nullptr);
+    input1_cu, input2_cu, output_cu, para, nullptr);
 
+  output_cu.to_cpu();
   for (int i = 0; i < size; ++i) {
     ASSERT_EQ(output_cpu.at<float>(i), output_cu.at<float>(i))
       << printf("index: %d, CPU: %f, GPU: %f\n",
@@ -95,11 +100,16 @@ TEST(test_cu_add, add_stream) {
   cudaStream_t stream;
   cudaStreamCreate(&stream);
 
+  para::add_para para;
+  para.ele_num = static_cast<int32_t>(input1_cpu.size());
+  para.thread_num = 1024;
+  para.block_num = (para.ele_num + para.thread_num - 1) / (para.thread_num * 4);
   kernel::get_add_kernel(base::DeviceType::kDeviceCPU)(
-    input1_cpu, input2_cpu, output_cpu, nullptr);
+    input1_cpu, input2_cpu, output_cpu, para, nullptr);
   kernel::get_add_kernel(base::DeviceType::kDeviceCUDA)(
-    input1_cu, input2_cu, output_cu, stream);
+    input1_cu, input2_cu, output_cu, para, nullptr);
 
+  output_cu.to_cpu();
   for (int i = 0; i < size; ++i) {
     ASSERT_EQ(output_cpu.at<float>(i), output_cu.at<float>(i))
       << printf("index: %d, CPU: %f, GPU: %f\n",

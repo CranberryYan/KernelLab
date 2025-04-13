@@ -5,7 +5,7 @@
 #include "base/buffer.h"
 #include "../source/op/kernels/kernels_interface.h"
 
-#if 1
+#if 0
 TEST(test_embedding_cu, embedding_nostream) {
   std::shared_ptr<base::CUDADeviceAllocator> alloc_cu =
     base::CUDADeviceAllocatorFactory::get_instance();

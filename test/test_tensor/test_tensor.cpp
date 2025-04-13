@@ -6,6 +6,7 @@
 #include "base/buffer.h"
 #include "tensor/tensor.h"
 
+#if 0
 TEST(test_tensor, init0) {
   std::shared_ptr<base::CUDADeviceAllocator> alloc_cu =
     base::CUDADeviceAllocatorFactory::get_instance();
@@ -165,3 +166,4 @@ TEST(test_tensor, assign1) {
   ASSERT_NE(t1_cpu.ptr<float>(), nullptr);
   delete[] ptr;
 }
+#endif

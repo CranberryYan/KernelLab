@@ -13,7 +13,9 @@ RMSNormKernel get_rmsnorm_kernel(base::DeviceType device_type);
 
 typedef void (*AddKernel)(const tensor::Tensor& input1,
                           const tensor::Tensor& input2,
-                          tensor::Tensor& output, void* stream);
+                          tensor::Tensor& output,
+                          para::add_para para,
+                          void* stream);
 
 AddKernel get_add_kernel(base::DeviceType device_type);
 

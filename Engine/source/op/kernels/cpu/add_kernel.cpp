@@ -1,11 +1,12 @@
 #include "base/base.h"
 #include "add_kernel.h"
 
-namespace kernel
-{
+namespace kernel {
 void add_kernel_cpu(const tensor::Tensor& input1,
                     const tensor::Tensor& input2,
-                    tensor::Tensor& output, void* stream) {
+                    tensor::Tensor& output,
+                    para::add_para para,
+                    void* stream) {
   CHECK_EQ(input1.is_empty(), false);
   CHECK_EQ(input2.is_empty(), false);
   CHECK_EQ(output.is_empty(), false);

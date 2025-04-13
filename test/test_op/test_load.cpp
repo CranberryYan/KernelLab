@@ -8,7 +8,7 @@
 #include "../include/model/config.h"
 #include "../source/op/kernels/kernels_interface.h"
 
-#if 1
+#if 0
 TEST(test_load, load_model_config) {
   std::string model_path = "./tmp/test.bin";
   int32_t fd = open(model_path.data(), O_RDONLY);

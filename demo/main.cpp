@@ -1,7 +1,7 @@
 #include <base/base.h>
 #include <base/tick.h>
 #include <glog/logging.h>
-#include "model/llama3.h"
+#include "model/llama2.h"
 int32_t generate(model::Llama2Model& model,
                  const std::string& sentence,
                  int total_steps,
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
     }
 
     auto start = std::chrono::steady_clock::now();
-    int steps = generate(model, input, 128, true);
+    int steps = generate(model, input, 1024, true);
     auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration<double>(end - start).count();
 

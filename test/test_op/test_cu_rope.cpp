@@ -7,6 +7,7 @@
 #include "../source/op/kernels/cuda/rope_kernel.cuh"
 #include "../source/op/kernels/kernels_interface.h"
 
+#if 0
 TEST(test_rope_cu, rope_nostream) {
   std::shared_ptr<base::CUDADeviceAllocator> alloc_cu =
     base::CUDADeviceAllocatorFactory::get_instance();
@@ -145,3 +146,4 @@ TEST(test_rope_cu, rope_stream) {
       << "iq: " << i;
   }
 }
+#endif

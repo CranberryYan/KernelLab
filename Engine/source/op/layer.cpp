@@ -194,10 +194,15 @@ const tensor::Tensor& Layer::get_output(int32_t idx) const {
   return outputs_.at(idx);
 }
 
-// TODO
 #if 1
 base::Status Layer::checkArgs() const {
-  return base::error::FunctionNotImplement("The checkArgs function is not implement yet");
+  return base::error::FunctionNotImplement(
+    "The checkArgs function is not implement yet");
+}
+
+base::Status Layer::compute() {
+  return base::error::FunctionNotImplement(
+    "The compute function is not implement yet");
 }
 #endif
 

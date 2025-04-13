@@ -66,6 +66,8 @@ public:
 
   virtual base::Status checkArgs() const = 0;
 
+  virtual base::Status compute() = 0;
+
   virtual tensor::Tensor& get_input(int32_t idx) = 0;
   virtual tensor::Tensor& get_output(int32_t idx) = 0;
   virtual const tensor::Tensor& get_input(int32_t idx) const = 0;
@@ -133,6 +135,8 @@ public:
                        const tensor::Tensor& input4,
                        const tensor::Tensor& input5,
                        const tensor::Tensor& output1) override;
+
+  base::Status compute() override;
 
   void set_input(int32_t idx, const tensor::Tensor& input) override;
   void set_output(int32_t idx, const tensor::Tensor& output) override;
