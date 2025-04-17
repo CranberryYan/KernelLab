@@ -15,6 +15,8 @@ public:
   void set_pos(int32_t pos);
   void set_layer_idx(int32_t layer_idx);
 
+  base::Status compute() override;
+
   base::Status forward() override;
 
 private:

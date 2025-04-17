@@ -11,6 +11,8 @@ public:
 
   base::Status checkArgs() const override;
 
+  base::Status compute() override;
+
   base::Status forward() override;
 
   base::Status set_bias(int32_t idx, int32_t& dims,

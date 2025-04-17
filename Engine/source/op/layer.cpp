@@ -136,12 +136,18 @@ base::Status Layer::check_tensor_with_dim(const tensor::Tensor& tensor,
                                           ...) const {
   std::va_list args;
   if (tensor.is_empty()) {
+    printf(" ================== ERROR ==================n");
+    printf("ERROR: The tensor parameter is empty.\n");
     return base::error::InvalidArgument("The tensor parameter is empty.");
   }
   if (tensor.device_type() != device_type) {
+    printf(" ================== ERROR ==================n");
+    printf("ERROR: The tensor has a wrong device type.\n");
     return base::error::InvalidArgument("The tensor has a wrong device type.");
   }
   if (tensor.data_type() != data_type) {
+    printf(" ================== ERROR ==================n");
+    printf("ERROR: The tensor has a wrong data type.\n");
     return base::error::InvalidArgument("The tensor has a wrong data type.");
   }
 

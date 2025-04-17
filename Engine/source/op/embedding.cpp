@@ -1,8 +1,11 @@
 #include "op/layer.h"
 #include "op/embedding.h"
+#include "./base/API_trace.h"
 #include "kernels/kernels_interface.h"
 
 namespace op {
+static const bool apiTraceEnabled = (std::getenv("api_trace") != nullptr);
+
 EmbeddingLayer::EmbeddingLayer(base::DeviceType device_type, int32_t dim,
                                int32_t seq_len, int32_t vocab_size) :
   dim_(dim), seq_len_(seq_len), vocab_size_(vocab_size),
@@ -45,24 +48,44 @@ base::Status EmbeddingLayer::checkArgs() const {
     return status;
   }
 
-  return base::error::Success();
-}
-
-base::Status EmbeddingLayer::forward() {
-  base::Status status = checkArgs();
-  if (!status) {
-    return status;
-  }
-
   if (device_type_ == base::DeviceType::kDeviceCUDA) {
     CHECK(cuda_config_ != nullptr);
   }
+
+  return base::error::Success();
+}
+
+base::Status EmbeddingLayer::compute() {
   kernel::get_embedding_kernel(device_type_)(get_input(0),
                                              get_weight(0),
                                              get_output(0),
                                              vocab_size_,
                                              cuda_config_ ?
                                              cuda_config_->stream : nullptr);
+
+  return base::error::Success();
+}
+
+base::Status EmbeddingLayer::forward() {
+  if (apiTraceEnabled) {
+    api_trace::API_trace trace("EmbeddingLayer::forward()");
+    trace.set_tensor("input", this->get_input(0));
+    trace.set_tensor("input_token_num", this->get_input(1));
+    trace.set_tensor("weight", this->get_weight(0));
+    trace.set_tensor("output", this->get_output(0));
+
+    trace.print_tensor();
+  }
+
+  base::Status status = checkArgs();
+  if (!status) {
+    return status;
+  }
+
+  status = this->compute();
+  if (!status) {
+    return status;
+  }
 
   return base::StatusCode::kSuccess;
 }

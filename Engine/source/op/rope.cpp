@@ -37,12 +37,7 @@ base::Status RoPELayer::checkArgs() const {
   return base::error::Success();
 }
 
-base::Status RoPELayer::forward() {
-  base::Status status = checkArgs();
-  if (!status) {
-    return status;
-  }
-
+base::Status RoPELayer::compute() {
   tensor::Tensor input_q = this->get_input(0);
   tensor::Tensor input_k = this->get_input(1);
   tensor::Tensor input_pos = this->get_input(2);
@@ -58,6 +53,20 @@ base::Status RoPELayer::forward() {
                                         sin_cache, cos_cache,
                                         cuda_config_ ? cuda_config_->stream :
                                                        nullptr);
+
+  return base::error::Success();
+}
+
+base::Status RoPELayer::forward() {
+  base::Status status = checkArgs();
+  if (!status) {
+    return status;
+  }
+
+  status = this->compute();
+  if (!status) {
+    return status;
+  }
 
   return base::error::Success();
 }

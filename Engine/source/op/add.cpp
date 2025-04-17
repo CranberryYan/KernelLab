@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include "op/add.h"
+#include "./base/API_trace.h"
 #include "kernels/kernels_interface.h"
 
 namespace op {
@@ -42,7 +43,6 @@ base::Status VecAddLayer::checkArgs() const {
 }
 
 base::Status VecAddLayer::compute() {
-  // printf("apiTraceEnabled: %d\n", apiTraceEnabled);
   auto input1 = this->get_input(0);
   auto input2 = this->get_input(1);
   auto output = this->get_output(0);
@@ -59,22 +59,17 @@ base::Status VecAddLayer::compute() {
   return base::error::Success();
 }
 
-void print_tensor(std::string name, tensor::Tensor ten) {
-  printf("%s\n", name.c_str());
-  printf("dataType: %d\n", static_cast<int>(ten.device_type()));
-  for (int dim = 0; dim < ten.dims().size(); ++dim) {
-    printf("%s[%d]: %d\n", name.c_str(), dim, ten.get_dim(dim));
-  }
-}
-
 base::Status VecAddLayer::forward() {
   if (apiTraceEnabled) {
-    printf("API_TRACE:\n");
-    printf("API_NAME: VecAddLayer::forward\n");
-    print_tensor("VecAddLayer.input1", this->get_input(0));
+    api_trace::API_trace trace("VecAddLayer::forward()");
+    trace.set_tensor("lhs", this->inputs_[0]);
+    trace.set_tensor("rhs", this->inputs_[1]);
+    trace.set_tensor("out", this->outputs_[0]);
+
+    trace.print_tensor();
   }
 
-  auto status = this->checkArgs();
+  base::Status status = this->checkArgs();
   if (!status) {
     return status;
   }

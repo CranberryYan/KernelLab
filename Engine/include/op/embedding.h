@@ -25,6 +25,8 @@ public:
   
   base::Status checkArgs() const override;
 
+  base::Status compute() override;
+
   base::Status forward() override;
 
 private:

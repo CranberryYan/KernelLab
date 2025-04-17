@@ -45,7 +45,6 @@ void embedding_kernel_cu(const tensor::Tensor& input,
   }
 
   const int32_t input_num = static_cast<int32_t>(input.size()); // token总数
-  printf(" ============================== input_num: %d\n", input_num);
   const int32_t weight_dim = weight.get_dim(1); // 每个token的嵌入向量的维度
   CHECK(weight.device_type() == output.device_type());
   CHECK(output.device_type() == base::DeviceType::kDeviceCUDA);

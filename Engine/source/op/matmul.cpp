@@ -1,7 +1,10 @@
 #include "op/matmul.h"
+#include "./base/API_trace.h"
 #include "kernels/kernels_interface.h"
 
 namespace op {
+static const bool apiTraceEnabled = (std::getenv("api_trace") != nullptr);
+
 MatmulLayer::MatmulLayer(base::DeviceType device_type,
                          int32_t dim0, int32_t dim1,
                          bool is_quant_layer, bool has_bias) :
@@ -60,14 +63,7 @@ base::Status MatmulLayer::checkArgs() const {
   return base::error::Success();
 }
 
-base::Status MatmulLayer::forward() {
-  auto status = checkArgs();
-  if (!status) {
-    return status;
-  }
-  if (device_type_ == base::DeviceType::kDeviceCUDA) {
-    CHECK(cuda_config_ != nullptr);
-  }
+base::Status MatmulLayer::compute() {
   if (is_quant_layer_) {
     kernel::get_matmul_kernel_quant8(device_type_)(
       get_input(0), get_weight(0), get_output(0),
@@ -87,6 +83,29 @@ base::Status MatmulLayer::forward() {
     kernel::get_add_kernel(device_type_)(
       get_output(0), get_bias(0), get_output(0), para,
       cuda_config_ ? cuda_config_->stream : nullptr);
+  }
+
+  return base::error::Success();
+}
+
+base::Status MatmulLayer::forward() {
+  if (apiTraceEnabled) {
+    api_trace::API_trace trace("MatmulLayer::forward()");
+    trace.set_tensor("input", this->get_input(0));
+    trace.set_tensor("weight", this->get_weight(0));
+    trace.set_tensor("output", this->get_output(0));
+
+    trace.print_tensor();
+  }
+
+  auto status = checkArgs();
+  if (!status) {
+    return status;
+  }
+
+  status = this->compute();
+  if (!status) {
+    return status;
   }
 
   return base::error::Success();

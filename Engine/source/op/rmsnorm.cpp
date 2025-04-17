@@ -1,8 +1,11 @@
 #include "op/layer.h"
 #include "op/rmsnorm.h"
+#include "./base/API_trace.h"
 #include "kernels/kernels_interface.h"
 
 namespace op {
+  static const bool apiTraceEnabled = (std::getenv("api_trace") != nullptr);
+
 RMSNormLayer::RMSNormLayer(base::DeviceType device_type, int32_t dim)
     : LayerParam(device_type, LayerType::kLayerRMSNorm, false, "RMSNorm"),
     dim_(dim) {
@@ -35,11 +38,7 @@ base::Status RMSNormLayer::checkArgs() const {
   return base::error::Success();
 }
 
-base::Status RMSNormLayer::forward() {
-  base::Status status = checkArgs();
-  if (!status) {
-    return status;
-  }
+base::Status RMSNormLayer::compute() {
   tensor::Tensor input = this->get_input(0);
   tensor::Tensor weight = this->get_weight(0);
   tensor::Tensor output = this->get_output(0);
@@ -50,6 +49,29 @@ base::Status RMSNormLayer::forward() {
                                            output,
                                            cuda_config_ ?
                                            cuda_config_->stream : nullptr);
+
+  return base::error::Success();
+}
+
+base::Status RMSNormLayer::forward() {
+  if (apiTraceEnabled) {
+    api_trace::API_trace trace("RMSNormLayer::forward()");
+    trace.set_tensor("input", this->get_input(0));
+    trace.set_tensor("weight", this->get_weight(0));
+    trace.set_tensor("output", this->get_output(0));
+
+    trace.print_tensor();
+  }
+
+  base::Status status = checkArgs();
+  if (!status) {
+    return status;
+  }
+
+  status = this->compute();
+  if (!status) {
+    return status;
+  }
 
   return base::error::Success();
 }
