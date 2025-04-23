@@ -17,6 +17,8 @@
 #include "cpu/softmax_kernel.h"
 #include "cpu/scale_sum_kernel.h"
 #include "cpu/scale_kernel.h"
+#include "cpu/reduce_kernel.h"
+#include "cuda/reduce_kernel.cuh"
 
 namespace kernel {
 RMSNormKernel get_rmsnorm_kernel(base::DeviceType device_type) {
@@ -120,5 +122,15 @@ ScaleKernel get_scale_kernel(base::DeviceType device_type) {
     LOG(FATAL) << "Unknown device type for get a rope kernel.";
     return nullptr;
   }
+}
+
+ReduceKernel get_reduce_kernel(base::DeviceType device_type) {
+  if (device_type == base::DeviceType::kDeviceCPU) {
+    return reduce_kernel_cpu;
+  } else if (device_type == base::DeviceType::kDeviceCUDA) {
+    return reduce_kernel_cu;
+  }
+  LOG(FATAL) << "Unknown device type for get an mha kernel.";
+  return nullptr;
 }
 } // namespace kernel

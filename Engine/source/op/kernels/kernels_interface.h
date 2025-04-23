@@ -1,6 +1,5 @@
 #ifndef KERNELS_INTERFACE_H
 #define KERNELS_INTERFACE_H
-
 #include <base/cuda_config.h>
 #include "tensor/tensor.h"
 
@@ -80,5 +79,11 @@ ScaleSumKernel get_scale_sum_kernel(base::DeviceType device_type);
 typedef void (*ScaleKernel)(float scale,
                             const tensor::Tensor& input, void* stream);
 ScaleKernel get_scale_kernel(base::DeviceType device_type);
+
+typedef void (*ReduceKernel)(const tensor::Tensor& input,
+                             tensor::Tensor &output,
+                             para::reduce_para para,
+                             void* stream);
+ReduceKernel get_reduce_kernel(base::DeviceType device_type);
 } // namespace kernel
 #endif // KERNELS_INTERFACE_H

@@ -1,7 +1,6 @@
 #include "embedding_kernel.h"
 
-namespace kernel
-{
+namespace kernel {
 void embedding_kernel_cpu(const tensor::Tensor& input,
                           const tensor::Tensor& weight,
                           tensor::Tensor& output,

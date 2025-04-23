@@ -19,6 +19,7 @@ enum class LayerType : uint8_t {
   kLayerSoftmax = 8,
   kLayerAdd = 9,
   kLayerSwiGLU = 10,
+  kLayerReduce = 11
 };
 
 class BaseLayer {
