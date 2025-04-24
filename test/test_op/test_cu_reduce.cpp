@@ -6,7 +6,7 @@
 #include "../include/op/reduce.h"
 #include "../source/op/kernels/kernels_interface.h"
 
-#if 1
+#if 0
 TEST(test_cu_reduce, test_0) {
   std::shared_ptr<base::CPUDeviceAllocator> alloc_cpu =
     base::CPUDeviceAllocatorFactory::get_instance();

@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "base.h"
+#include "para.h"
 #include "../tensor/tensor.h"
 
 namespace api_trace {
@@ -25,6 +26,8 @@ public:
   void print_tensor(std::string name, tensor::Tensor ten);
 
   void print_tensor();
+
+  void print_scatter_type(para::ScatterOpType op_type);
 private:
   std::string func_;
   std::map<std::string, tensor::Tensor> tensor_map;

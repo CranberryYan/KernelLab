@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "base/base.h"
+#include "base/para.h"
 #include "tensor/tensor.h"
 
 namespace op {
@@ -19,7 +20,8 @@ enum class LayerType : uint8_t {
   kLayerSoftmax = 8,
   kLayerAdd = 9,
   kLayerSwiGLU = 10,
-  kLayerReduce = 11
+  kLayerReduce = 11,
+  kLayerScatter = 12
 };
 
 class BaseLayer {
@@ -86,6 +88,7 @@ public:
   base::DeviceType device_type() const;
   void set_device_type(base::DeviceType device_type);
 protected: // 派生类可以访问, 外部无法访问
+  para::para_base para_base_;
   std::string layer_name_;
   LayerType layer_type_ = LayerType::kLayerUnknown;
   base::DataType data_type_ = base::DataType::kDataTypeUnknown;

@@ -85,5 +85,13 @@ typedef void (*ReduceKernel)(const tensor::Tensor& input,
                              para::reduce_para para,
                              void* stream);
 ReduceKernel get_reduce_kernel(base::DeviceType device_type);
+
+typedef void (*ScatterKernel)(const tensor::Tensor& input,
+                              const tensor::Tensor& src,
+                              const tensor::Tensor& index,
+                              tensor::Tensor &output,
+                              para::scatter_para para,
+                              void* stream);
+ScatterKernel get_scatter_kernel(base::DeviceType device_type);
 } // namespace kernel
 #endif // KERNELS_INTERFACE_H

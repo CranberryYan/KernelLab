@@ -19,6 +19,8 @@
 #include "cpu/scale_kernel.h"
 #include "cpu/reduce_kernel.h"
 #include "cuda/reduce_kernel.cuh"
+#include "cpu/scatter_kernel.h"
+#include "cuda/scatter_kernel.cuh"
 
 namespace kernel {
 RMSNormKernel get_rmsnorm_kernel(base::DeviceType device_type) {
@@ -130,7 +132,17 @@ ReduceKernel get_reduce_kernel(base::DeviceType device_type) {
   } else if (device_type == base::DeviceType::kDeviceCUDA) {
     return reduce_kernel_cu;
   }
-  LOG(FATAL) << "Unknown device type for get an mha kernel.";
+  LOG(FATAL) << "Unknown device type for get an reduce kernel.";
+  return nullptr;
+}
+
+ScatterKernel get_scatter_kernel(base::DeviceType device_type) {
+  if (device_type == base::DeviceType::kDeviceCPU) {
+    return scatter_kernel_cpu;
+  } else if (device_type == base::DeviceType::kDeviceCUDA) {
+    return scatter_kernel_cu;
+  }
+  LOG(FATAL) << "Unknown device type for get an scatter kernel.";
   return nullptr;
 }
 } // namespace kernel
