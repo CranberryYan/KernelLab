@@ -34,8 +34,8 @@ TEST(test_cu_reduce, test_0) {
   std::uniform_real_distribution<float> dist(0.f, 1.f);
   for (int i = 0; i < ele_num; ++i) {
     float input_tmp = dist(mt);
-    input_cpu.set_value<float>(1, i);
-    input_cu.set_value<float>(1, i);
+    input_cpu.set_value<float>(input_tmp, i);
+    input_cu.set_value<float>(input_tmp, i);
   }
 
   std::shared_ptr<op::Layer> reduce_layer_cpu =
