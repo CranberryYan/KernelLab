@@ -21,7 +21,8 @@ enum class LayerType : uint8_t {
   kLayerAdd = 9,
   kLayerSwiGLU = 10,
   kLayerReduce = 11,
-  kLayerScatter = 12
+  kLayerScatter = 12,
+  kLayerIndexAdd = 13
 };
 
 class BaseLayer {

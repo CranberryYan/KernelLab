@@ -20,17 +20,17 @@ TEST(test_cu_add, test_0) {
   }
 
   tensor::Tensor input1_cpu(base::DataType::kDataTypeFp32, ele_num,
-                         true, alloc_cpu, nullptr);
+                            true, alloc_cpu, nullptr);
   tensor::Tensor input2_cpu(base::DataType::kDataTypeFp32, ele_num,
-                         true, alloc_cpu, nullptr);
+                            true, alloc_cpu, nullptr);
   tensor::Tensor output_cpu(base::DataType::kDataTypeFp32, ele_num,
-                         true, alloc_cpu, nullptr);
+                            true, alloc_cpu, nullptr);
   tensor::Tensor input1_cu(base::DataType::kDataTypeFp32, ele_num,
-                         true, alloc_cu, nullptr);
+                           true, alloc_cu, nullptr);
   tensor::Tensor input2_cu(base::DataType::kDataTypeFp32, ele_num,
-                         true, alloc_cu, nullptr);
+                           true, alloc_cu, nullptr);
   tensor::Tensor output_cu(base::DataType::kDataTypeFp32, ele_num,
-                         true, alloc_cu, nullptr);
+                           true, alloc_cu, nullptr);
 
   std::random_device rd;
   std::mt19937 mt(rd());

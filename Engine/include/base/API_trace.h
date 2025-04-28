@@ -28,6 +28,8 @@ public:
   void print_tensor();
 
   void print_scatter_type(para::ScatterOpType op_type);
+
+  void print_softmax_type(para::SoftmaxOpType op_type);
 private:
   std::string func_;
   std::map<std::string, tensor::Tensor> tensor_map;

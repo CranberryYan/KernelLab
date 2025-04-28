@@ -21,6 +21,10 @@
 #include "cuda/reduce_kernel.cuh"
 #include "cpu/scatter_kernel.h"
 #include "cuda/scatter_kernel.cuh"
+#include "cpu/softmax_kernel.h"
+#include "cuda/softmax_kernel.cuh"
+#include "cpu/index_add_kernel.h"
+#include "cuda/index_add_kernel.cuh"
 
 namespace kernel {
 RMSNormKernel get_rmsnorm_kernel(base::DeviceType device_type) {
@@ -101,14 +105,6 @@ MHAKernel get_mha_kernel(base::DeviceType device_type) {
   return nullptr;
 }
 
-SoftmaxInplaceKernel get_softmax_kernel(base::DeviceType device_type) {
-  if (device_type == base::DeviceType::kDeviceCPU) {
-    return softmax_inplace_cpu;
-  }
-  LOG(FATAL) << "Unknown device type for get an softmax kernel.";
-  return nullptr;
-}
-
 ScaleSumKernel get_scale_sum_kernel(base::DeviceType device_type) {
   if (device_type == base::DeviceType::kDeviceCPU) {
     return scale_sum_kernel_cpu;
@@ -143,6 +139,26 @@ ScatterKernel get_scatter_kernel(base::DeviceType device_type) {
     return scatter_kernel_cu;
   }
   LOG(FATAL) << "Unknown device type for get an scatter kernel.";
+  return nullptr;
+}
+
+SoftmaxKernel get_softmax_kernel(base::DeviceType device_type) {
+  if (device_type == base::DeviceType::kDeviceCPU) {
+    return softmax_kernel_cpu;
+  } else if (device_type == base::DeviceType::kDeviceCUDA) {
+    return softmax_kernel_cu;
+  }
+  LOG(FATAL) << "Unknown device type for get an softmax kernel.";
+  return nullptr;
+}
+
+IndexAddernel get_index_add_kernel(base::DeviceType device_type) {
+  if (device_type == base::DeviceType::kDeviceCPU) {
+    return index_add_kernel_cpu;
+  } else if (device_type == base::DeviceType::kDeviceCUDA) {
+    return index_add_kernel_cu;
+  }
+  LOG(FATAL) << "Unknown device type for get an index_add kernel.";
   return nullptr;
 }
 } // namespace kernel

@@ -12,8 +12,8 @@ void scatter_kernel_cpu(const tensor::Tensor &input,
   uint32_t rows = input.get_dim(0);
   uint32_t input_cols = input.get_dim(1);
   uint32_t index_cols = index.get_dim(1);
-  for (uint32_t  row = 0; row < rows; ++row) {
-    for (uint32_t  col = 0; col < index_cols; ++col) {
+  for (uint32_t row = 0; row < rows; ++row) {
+    for (uint32_t col = 0; col < index_cols; ++col) {
       uint32_t index_offset = row * index_cols + col;
       int idx = index.at<int>(index_offset) < 0 ?
                 index.at<int>(index_offset) + input_cols :

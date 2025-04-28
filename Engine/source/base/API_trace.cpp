@@ -79,4 +79,13 @@ void API_trace::print_scatter_type(para::ScatterOpType op_type) {
     default:                            printf("SCATTER_OP_TYPE: UnknownScatterOpType\n"); break;
   }
 }
+
+void API_trace::print_softmax_type(para::SoftmaxOpType op_type) {
+  switch (op_type) {
+    case para::SoftmaxOpType::Naive:    printf("SOFTMAX_OP_TYPE: SOFTMAX_NAIVE\n"); break;
+    case para::SoftmaxOpType::Safe:     printf("SOFTMAX_OP_TYPE: SOFTMAX_SAFE\n"); break;
+    case para::SoftmaxOpType::Online:   printf("SOFTMAX_OP_TYPE: SOFTMAX_ONLINE\n"); break;
+    default:                            printf("SOFTMAX_OP_TYPE: UnknownScatterOpType\n"); break;
+  }
+}
 } // api_trace

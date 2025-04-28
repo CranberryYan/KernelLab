@@ -21,10 +21,10 @@ __global__ void scatter_kernel_v0(const float* input, const int32_t* index,
   // 数据流
   uint32_t shared_src_mem_size =
     math_cu::AlignUp<uint32_t>(
-      src_ele_num_per_block * sizeof(float), 512);
+      src_ele_num_per_block * sizeof(float), 128);
   uint32_t shared_index_mem_size =
     math_cu::AlignUp<uint32_t>(
-      index_ele_num_per_block * sizeof(uint32_t), 512);
+      index_ele_num_per_block * sizeof(uint32_t), 128);
 
   extern __shared__ char smem[];
   int* shared_index = reinterpret_cast<int*>(smem);
@@ -91,10 +91,10 @@ void scatter_kernel_cu(const tensor::Tensor &input,
 
   uint32_t shared_src_mem_size =
     math_cu::AlignUp<uint32_t>(
-      para.src_ele_num_per_block * sizeof(float), 512);
+      para.src_ele_num_per_block * sizeof(float), 128);
   uint32_t shared_index_mem_size =
     math_cu::AlignUp<uint32_t>(
-      para.index_ele_num_per_block * sizeof(uint32_t), 512);
+      para.index_ele_num_per_block * sizeof(uint32_t), 128);
   uint32_t shared_mem_size = shared_src_mem_size + shared_index_mem_size;
 
   para::scatter_para* para_device;

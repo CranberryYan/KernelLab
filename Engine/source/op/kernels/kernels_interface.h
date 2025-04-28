@@ -66,9 +66,6 @@ typedef void (*MHAKernel)(int32_t pos, int32_t head_num, int32_t layer_index,
                           CudaConfig*);
 MHAKernel get_mha_kernel(base::DeviceType device_type);
 
-typedef void (*SoftmaxInplaceKernel)(const tensor::Tensor& input, void* stream);
-SoftmaxInplaceKernel get_softmax_kernel(base::DeviceType device_type);
-
 typedef void (*ScaleSumKernel)(const tensor::Tensor& value,
                                const tensor::Tensor& scale,
                                tensor::Tensor& output,
@@ -93,5 +90,19 @@ typedef void (*ScatterKernel)(const tensor::Tensor& input,
                               para::scatter_para para,
                               void* stream);
 ScatterKernel get_scatter_kernel(base::DeviceType device_type);
+
+typedef void (*SoftmaxKernel)(const tensor::Tensor& input,
+                              tensor::Tensor& ouput,
+                              para::softmax_para para,
+                              void* stream);
+SoftmaxKernel get_softmax_kernel(base::DeviceType device_type);
+
+typedef void (*IndexAddernel)(const tensor::Tensor& input,
+                              const tensor::Tensor& index,
+                              const tensor::Tensor& source,
+                              tensor::Tensor& output,
+                              para::index_add_para para,
+                              void* stream);
+IndexAddernel get_index_add_kernel(base::DeviceType device_type);
 } // namespace kernel
 #endif // KERNELS_INTERFACE_H
