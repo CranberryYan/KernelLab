@@ -6,7 +6,7 @@
 #include "../include/op/scatter.h"
 #include "../source/op/kernels/kernels_interface.h"
 
-#if 0
+#if 1
 TEST(test_cu_scatter, test_0_update) {
   std::shared_ptr<base::CPUDeviceAllocator> alloc_cpu =
     base::CPUDeviceAllocatorFactory::get_instance();
@@ -20,7 +20,7 @@ TEST(test_cu_scatter, test_0_update) {
   }
 
   int index_ele_num = 1;
-  std::vector<uint32_t> index_dims = {256, 512};
+  std::vector<uint32_t> index_dims = {128, 512};
   for (auto &dim : index_dims) {
     index_ele_num *= dim;
   }
@@ -29,13 +29,13 @@ TEST(test_cu_scatter, test_0_update) {
     true, alloc_cpu, nullptr);
   tensor::Tensor src_cpu(base::DataType::kDataTypeFp32, 256, 512,
     true, alloc_cpu, nullptr);
-  tensor::Tensor index_cpu(base::DataType::kDataTypeInt32, 256, 512,
+  tensor::Tensor index_cpu(base::DataType::kDataTypeInt32, 128, 512,
     true, alloc_cpu, nullptr);
   tensor::Tensor input_cu(base::DataType::kDataTypeFp32, 256, 1024,
     true, alloc_cu, nullptr);
   tensor::Tensor src_cu(base::DataType::kDataTypeFp32, 256, 512,
     true, alloc_cu, nullptr);
-  tensor::Tensor index_cu(base::DataType::kDataTypeInt32, 256, 512,
+  tensor::Tensor index_cu(base::DataType::kDataTypeInt32, 128, 512,
     true, alloc_cu, nullptr);
 
   std::random_device rd;
@@ -71,17 +71,21 @@ TEST(test_cu_scatter, test_0_update) {
   // 下行转换, 访问派生类的成员变量
   std::shared_ptr<op::ScatterLayer> scatter_layer_cpu_ =
     std::dynamic_pointer_cast<op::ScatterLayer>(scatter_layer_cpu);
-  scatter_layer_cpu_->op_type = para::ScatterOpType::Update;
+  scatter_layer_cpu_->op_type = para::ScatterOpType::Scatter_Update;
 
   std::shared_ptr<op::ScatterLayer> scatter_layer_cu_ =
     std::dynamic_pointer_cast<op::ScatterLayer>(scatter_layer_cu);
-  scatter_layer_cu_->op_type = para::ScatterOpType::Update;
+  scatter_layer_cu_->op_type = para::ScatterOpType::Scatter_Update;
 
   scatter_layer_cpu->forward(input_cpu, src_cpu, index_cpu, input_cpu);
   scatter_layer_cu->forward(input_cu, src_cu, index_cu, input_cu);
 
   input_cu.to_cpu();
   for (int i = 0; i < input_ele_num; ++i) {
+    if (i < 10) {
+      printf("index: %d, CPU: %f, GPU: %f\n",
+        i, input_cpu.at<float>(i), input_cu.at<float>(i));
+    }
     ASSERT_EQ(input_cpu.at<float>(i), input_cu.at<float>(i))
       << printf("index: %d, CPU: %f, GPU: %f\n",
         i, input_cpu.at<float>(i), input_cu.at<float>(i));
@@ -152,18 +156,21 @@ TEST(test_cu_scatter, test_0_add) {
   // 下行转换, 访问派生类的成员变量
   std::shared_ptr<op::ScatterLayer> scatter_layer_cpu_ =
     std::dynamic_pointer_cast<op::ScatterLayer>(scatter_layer_cpu);
-  scatter_layer_cpu_->op_type = para::ScatterOpType::Add;
+  scatter_layer_cpu_->op_type = para::ScatterOpType::Scatter_Add;
 
   std::shared_ptr<op::ScatterLayer> scatter_layer_cu_ =
     std::dynamic_pointer_cast<op::ScatterLayer>(scatter_layer_cu);
-  scatter_layer_cu_->op_type = para::ScatterOpType::Add;
+  scatter_layer_cu_->op_type = para::ScatterOpType::Scatter_Add;
 
   scatter_layer_cpu->forward(input_cpu, src_cpu, index_cpu, input_cpu);
   scatter_layer_cu->forward(input_cu, src_cu, index_cu, input_cu);
 
   input_cu.to_cpu();
   for (int i = 0; i < input_ele_num; ++i) {
-    
+    if (i < 10) {
+      printf("index: %d, CPU: %f, GPU: %f\n",
+        i, input_cpu.at<float>(i), input_cu.at<float>(i));
+    }
     float diff = std::abs(
       input_cpu.at<float>(i) - input_cu.at<float>(i));
     if (diff > 1e-3) {
@@ -237,17 +244,21 @@ TEST(test_cu_scatter, test_1_update) {
   // 下行转换, 访问派生类的成员变量
   std::shared_ptr<op::ScatterLayer> scatter_layer_cpu_ =
     std::dynamic_pointer_cast<op::ScatterLayer>(scatter_layer_cpu);
-  scatter_layer_cpu_->op_type = para::ScatterOpType::Update;
+  scatter_layer_cpu_->op_type = para::ScatterOpType::Scatter_Update;
 
   std::shared_ptr<op::ScatterLayer> scatter_layer_cu_ =
     std::dynamic_pointer_cast<op::ScatterLayer>(scatter_layer_cu);
-  scatter_layer_cu_->op_type = para::ScatterOpType::Update;
+  scatter_layer_cu_->op_type = para::ScatterOpType::Scatter_Update;
 
   scatter_layer_cpu->forward(input_cpu, src_cpu, index_cpu, input_cpu);
   scatter_layer_cu->forward(input_cu, src_cu, index_cu, input_cu);
 
   input_cu.to_cpu();
   for (int i = 0; i < input_ele_num; ++i) {
+    if (i < 10) {
+      printf("index: %d, CPU: %f, GPU: %f\n",
+        i, input_cpu.at<float>(i), input_cu.at<float>(i));
+    }
     ASSERT_EQ(input_cpu.at<float>(i), input_cu.at<float>(i))
       << printf("index: %d, CPU: %f, GPU: %f\n",
         i, input_cpu.at<float>(i), input_cu.at<float>(i));
@@ -318,23 +329,114 @@ TEST(test_cu_scatter, test_1_add) {
   // 下行转换, 访问派生类的成员变量
   std::shared_ptr<op::ScatterLayer> scatter_layer_cpu_ =
     std::dynamic_pointer_cast<op::ScatterLayer>(scatter_layer_cpu);
-  scatter_layer_cpu_->op_type = para::ScatterOpType::Add;
+  scatter_layer_cpu_->op_type = para::ScatterOpType::Scatter_Add;
 
   std::shared_ptr<op::ScatterLayer> scatter_layer_cu_ =
     std::dynamic_pointer_cast<op::ScatterLayer>(scatter_layer_cu);
-  scatter_layer_cu_->op_type = para::ScatterOpType::Add;
+  scatter_layer_cu_->op_type = para::ScatterOpType::Scatter_Add;
 
   scatter_layer_cpu->forward(input_cpu, src_cpu, index_cpu, input_cpu);
   scatter_layer_cu->forward(input_cu, src_cu, index_cu, input_cu);
 
   input_cu.to_cpu();
   for (int i = 0; i < input_ele_num; ++i) {
-    
+    if (i < 10) {
+      printf("index: %d, CPU: %f, GPU: %f\n",
+        i, input_cpu.at<float>(i), input_cu.at<float>(i));
+    }
     float diff = std::abs(
       input_cpu.at<float>(i) - input_cu.at<float>(i));
     if (diff > 1e-3) {
       printf("index: %d, CPU: %f, GPU: %f\n",
         i, input_cpu.at<float>(i), input_cu.at<float>(i));
+    }
+  }
+}
+
+TEST(test_cu_scatter, test_0_gather) {
+  std::shared_ptr<base::CPUDeviceAllocator> alloc_cpu =
+    base::CPUDeviceAllocatorFactory::get_instance();
+  std::shared_ptr<base::CUDADeviceAllocator> alloc_cu =
+    base::CUDADeviceAllocatorFactory::get_instance();
+
+  int input_ele_num = 1;
+  std::vector<uint32_t> intput_dims = {1024, 1024};
+  for (auto &dim : intput_dims) {
+    input_ele_num *= dim;
+  }
+
+  int index_ele_num = 1;
+  std::vector<uint32_t> index_dims = {512, 512};
+  for (auto &dim : index_dims) {
+    index_ele_num *= dim;
+  }
+
+  tensor::Tensor input_cpu(base::DataType::kDataTypeFp32, 1024, 1024,
+    true, alloc_cpu, nullptr);
+  tensor::Tensor output_cpu(base::DataType::kDataTypeFp32, 512, 512,
+    true, alloc_cpu, nullptr);
+  tensor::Tensor index_cpu(base::DataType::kDataTypeInt32, 512, 512,
+    true, alloc_cpu, nullptr);
+  tensor::Tensor input_cu(base::DataType::kDataTypeFp32, 1024, 1024,
+    true, alloc_cu, nullptr);
+  tensor::Tensor output_cu(base::DataType::kDataTypeFp32, 512, 512,
+    true, alloc_cu, nullptr);
+  tensor::Tensor index_cu(base::DataType::kDataTypeInt32, 512, 512,
+    true, alloc_cu, nullptr);
+
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_real_distribution<float> dist_float(-512.0f, 1024.f);
+  std::uniform_int_distribution<int> dist_int(-512, 1023);
+  for (int i = 0; i < input_ele_num; ++i) {
+    float input_tmp = dist_float(mt);
+    input_cpu.set_value<float>(input_tmp, i);
+    // input_cu.set_value<float>(input_tmp, i);
+  }
+  input_cu = input_cpu.clone();
+  input_cu.to_cuda();
+
+  for (int i = 0; i < index_ele_num; ++i) {
+    int index_tmp = dist_int(mt);
+    index_cpu.set_value<int>(index_tmp, i);
+    // index_cu.set_value<int>(index_tmp, i);
+  }
+  index_cu = index_cpu.clone();
+  index_cu.to_cuda();
+
+  std::shared_ptr<op::Layer> scatter_layer_cpu =
+    std::make_shared<op::ScatterLayer>(base::DeviceType::kDeviceCPU);
+  std::shared_ptr<op::Layer> scatter_layer_cu =
+    std::make_shared<op::ScatterLayer>(base::DeviceType::kDeviceCUDA);
+
+  cudaStream_t stream;
+  cudaStreamCreate(&stream);
+  std::shared_ptr<kernel::CudaConfig> config =
+    std::make_shared<kernel::CudaConfig>();
+  config->stream = stream;
+  scatter_layer_cu->set_cuda_config(config);
+
+  // 下行转换, 访问派生类的成员变量
+  std::shared_ptr<op::ScatterLayer> scatter_layer_cpu_ =
+    std::dynamic_pointer_cast<op::ScatterLayer>(scatter_layer_cpu);
+  scatter_layer_cpu_->op_type = para::ScatterOpType::Gather;
+
+  std::shared_ptr<op::ScatterLayer> scatter_layer_cu_ =
+    std::dynamic_pointer_cast<op::ScatterLayer>(scatter_layer_cu);
+  scatter_layer_cu_->op_type = para::ScatterOpType::Gather;
+
+  scatter_layer_cpu->forward(input_cpu, index_cpu, index_cpu, output_cpu);
+  scatter_layer_cu->forward(input_cu, index_cu, index_cu, output_cu);
+
+  output_cu.to_cpu();
+  for (int i = 0; i < index_ele_num; ++i) {
+    if (i < 10) {
+      printf("index: %d, CPU: %f, GPU: %f\n",
+        i, output_cpu.at<float>(i), output_cu.at<float>(i));
+    }
+    if (output_cpu.at<float>(i) != output_cu.at<float>(i)) {
+      printf("index: %d, CPU: %f, GPU: %f\n",
+        i, output_cpu.at<float>(i), output_cu.at<float>(i));
     }
   }
 }

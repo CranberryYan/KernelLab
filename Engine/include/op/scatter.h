@@ -16,7 +16,7 @@ public:
   base::Status forward() override;
 
 public:
-  para::ScatterOpType op_type = para::ScatterOpType::Update;
+  para::ScatterOpType op_type = para::ScatterOpType::Scatter_Update;
 };
 }
 #endif // ENGINE_INCLUDE_OP_SCATTER_H_

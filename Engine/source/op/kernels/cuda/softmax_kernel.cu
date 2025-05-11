@@ -143,16 +143,12 @@ __global__ void safe_softmax_kernel_v1(const float* input, float* output,
   uint32_t tid = threadIdx.x;
   uint32_t bid = blockIdx.x;
 
-  __shared__ float sum;
   __shared__ float sum_block;
   __shared__ float max_block;
   extern __shared__ float shared_cols[];
 
   uint32_t cols_4 = cols / 4;
   for (int r = bid; r < rows; r += gridDim.x) {
-    if (tid == 0) {
-      sum = 0;
-    }
     for (int c = tid; c < cols_4; c += blockDim.x) {
       shared_cols[c * 4 + 0] = input[r * cols + c * 4 + 0];
       shared_cols[c * 4 + 1] = input[r * cols + c * 4 + 1];

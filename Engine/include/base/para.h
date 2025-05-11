@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 
+#define SMEM_ALIGN 128
+
 namespace para {
 struct para_base {
 
@@ -28,8 +30,9 @@ struct reduce_para : public para_base {
 };
 
 enum class ScatterOpType {
-  Add = 0,
-  Update = 1
+  Scatter_Add = 0,
+  Scatter_Update = 1,
+  Gather = 2
 };
 
 struct scatter_para : public para_base {
@@ -93,6 +96,7 @@ struct index_add_para : public para_base {
 
   uint32_t ele_num_per_block;
   uint32_t block_per_target_row;
+  uint32_t block_per_source_row;
 
   EnflameDevice enflame_device;
 };

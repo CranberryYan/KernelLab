@@ -9,7 +9,7 @@ static const bool apiTraceEnabled = (std::getenv("api_trace") != nullptr);
 ScatterLayer::ScatterLayer(base::DeviceType device_type) :
   Layer(device_type, LayerType::kLayerScatter, "Scatter") {
   reset_input_size(3); // input src index
-  reset_output_size(1); // output(注: input和output公用一块地址)
+  reset_output_size(1);
 }
 
 base::Status ScatterLayer::checkArgs() const {
@@ -23,12 +23,52 @@ base::Status ScatterLayer::checkArgs() const {
   uint32_t index_ele_num = index.size();
   uint32_t output_ele_num = output.size();
 
-  if (input.get_buffer() != output.get_buffer()) {
-    return base::error::InvalidArgument("input.buffer != output.buffer");
-  }
+  if (op_type == para::ScatterOpType::Scatter_Add ||
+      op_type == para::ScatterOpType::Scatter_Update) {
+    status = check_tensor_with_dim(src, device_type_,
+                                  data_type_,
+                                  src.get_dim(0),
+                                  src.get_dim(1));;
+    if (!status) {
+      LOG(ERROR) << "The src tensor error in the scatter layer.";
+      return status;
+    }
 
-  if (input_ele_num != output_ele_num) {
-    return base::error::InvalidArgument("The tensor has a wrong ele num.");
+    if (input.get_buffer() != output.get_buffer()) {
+      return base::error::InvalidArgument("input.buffer != output.buffer");
+    }
+
+    if (input_ele_num != output_ele_num) {
+      return base::error::InvalidArgument(
+        "The input tensor has a wrong ele num.");
+    }
+
+    status = check_tensor_with_dim(index, device_type_,
+                                  base::DataType::kDataTypeInt32,
+                                  index.get_dim(0),
+                                  index.get_dim(1));
+    if (!status) {
+      LOG(ERROR) << "The index tensor error in the scatter layer.";
+      return status;
+    }
+
+    status = check_tensor_with_dim(output, device_type_,
+                                  data_type_,
+                                  output.get_dim(0),
+                                  output.get_dim(1));
+    if (!status) {
+      LOG(ERROR) << "The output tensor error in the scatter layer.";
+      return status;
+    }
+  } else if (op_type == para::ScatterOpType::Gather) {
+    if (input.get_buffer() == output.get_buffer()) {
+      return base::error::InvalidArgument("input.buffer == output.buffer");
+    }
+
+    if (index_ele_num != output_ele_num) {
+      return base::error::InvalidArgument(
+        "The output tensor has a wrong ele num.");
+    }
   }
 
   status = check_tensor_with_dim(input, device_type_,
@@ -37,33 +77,6 @@ base::Status ScatterLayer::checkArgs() const {
                                  input.get_dim(1));
   if (!status) {
     LOG(ERROR) << "The input tensor error in the scatter layer.";
-    return status;
-  }
-
-  status = check_tensor_with_dim(src, device_type_,
-                                 data_type_,
-                                 src.get_dim(0),
-                                 src.get_dim(1));;
-  if (!status) {
-    LOG(ERROR) << "The src tensor error in the scatter layer.";
-    return status;
-  }
-
-  status = check_tensor_with_dim(index, device_type_,
-                                 base::DataType::kDataTypeInt32,
-                                 index.get_dim(0),
-                                 index.get_dim(1));
-  if (!status) {
-    LOG(ERROR) << "The index tensor error in the scatter layer.";
-    return status;
-  }
-
-  status = check_tensor_with_dim(output, device_type_,
-                                 data_type_,
-                                 output.get_dim(0),
-                                 output.get_dim(1));
-  if (!status) {
-    LOG(ERROR) << "The output tensor error in the scatter layer.";
     return status;
   }
 
@@ -82,7 +95,7 @@ base::Status ScatterLayer::compute() {
 
   para::scatter_para para;
   para.op_type = this->op_type;
-  para.block_num = index.get_dim(0);
+  para.block_num = index.get_dim(0); // TODO: 小shape下性能不佳 -> 超发
   para.thread_num = index.get_dim(1);
   para.input_dims = input.dims();
   para.index_dims = index.dims();
@@ -131,7 +144,7 @@ base::Status ScatterLayer::forward() {
 
   base::Status status = this->checkArgs();
   if (!status) {
-    return status;
+    // return status;
   }
 
   status = this->compute();

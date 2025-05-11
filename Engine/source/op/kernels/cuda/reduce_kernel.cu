@@ -25,7 +25,7 @@ __global__ void reduce_kernel_v0(const float* input, float* output) {
   uint32_t tid = threadIdx.x;
   uint32_t gid = blockIdx.x * blockDim.x + threadIdx.x;
 
-  // L3 -> L2
+  // gmem -> smem
   smem[tid] = input[gid];
   __syncthreads();
 
@@ -50,7 +50,7 @@ __global__ void reduce_kernel_v1(const float* input, float* output) {
   uint32_t tid = threadIdx.x;
   uint32_t gid = blockIdx.x * blockDim.x + threadIdx.x;
 
-  // L3 -> L2
+  // gmem -> smem
   smem[tid] = input[gid];
   __syncthreads();
 
@@ -80,7 +80,7 @@ __global__ void reduce_kernel_v2(const float* input, float* output) {
   uint32_t tid = threadIdx.x;
   uint32_t gid = blockIdx.x * blockDim.x + threadIdx.x;
 
-  // L3 -> L2
+  // gmem -> smem
   smem[tid] = input[gid];
   __syncthreads();
 
@@ -127,7 +127,7 @@ __global__ void reduce_kernel_v3(const float* input, float* output) {
   uint32_t tid = threadIdx.x;
   uint32_t gid = blockIdx.x * blockDim.x + threadIdx.x;
 
-  // L3 -> L2
+  // gmem -> smem
   extern __shared__ float smem[]; // 外部已经定义smem的大小(注意要使用extern关键字)
   smem[tid] = input[gid];
   __syncthreads();
@@ -146,7 +146,7 @@ __global__ void reduce_kernel_v3(const float* input, float* output) {
     unroll_last_warp(smem, tid);
   }
 
-  // 每个block的第0个thread, 将结果L2 -> L3
+  // 每个block的第0个thread, 将结果smem -> gmem
   if (tid == 0) {
     output[blockIdx.x] = smem[0];
   }

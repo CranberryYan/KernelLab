@@ -74,8 +74,9 @@ void API_trace::print_tensor() {
 
 void API_trace::print_scatter_type(para::ScatterOpType op_type) {
   switch (op_type) {
-    case para::ScatterOpType::Add:      printf("SCATTER_OP_TYPE: SCATTER_ADD\n"); break;
-    case para::ScatterOpType::Update:   printf("SCATTER_OP_TYPE: SCATTER_UPDATE\n"); break;
+    case para::ScatterOpType::Scatter_Add:      printf("SCATTER_OP_TYPE: SCATTER_ADD\n"); break;
+    case para::ScatterOpType::Scatter_Update:   printf("SCATTER_OP_TYPE: SCATTER_UPDATE\n"); break;
+    case para::ScatterOpType::Gather:   printf("SCATTER_OP_TYPE: Gather\n"); break;
     default:                            printf("SCATTER_OP_TYPE: UnknownScatterOpType\n"); break;
   }
 }
