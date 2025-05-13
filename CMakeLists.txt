@@ -82,14 +82,14 @@ find_package(GTest REQUIRED)
 find_package(glog REQUIRED)
 find_package(Armadillo REQUIRED)
 
-aux_source_directory(Engine/source/tensor/ DIR_TENSOR)
-aux_source_directory(Engine/source/base/ DIR_BASE)
-aux_source_directory(Engine/source/op/ DIR_OP)
-aux_source_directory(Engine/source/model/ DIR_MODEL)
-aux_source_directory(Engine/source/op/kernels/cpu DIR_KERNEL_CPU)
-aux_source_directory(Engine/source/op/kernels/cuda DIR_KERNEL_CUDA)
-aux_source_directory(Engine/source/op/kernels/ DIR_KERNEL)
-aux_source_directory(Engine/source/sampler DIR_SAMPLE)
+aux_source_directory(KernelLab/source/tensor/ DIR_TENSOR)
+aux_source_directory(KernelLab/source/base/ DIR_BASE)
+aux_source_directory(KernelLab/source/op/ DIR_OP)
+aux_source_directory(KernelLab/source/model/ DIR_MODEL)
+aux_source_directory(KernelLab/source/op/kernels/cpu DIR_KERNEL_CPU)
+aux_source_directory(KernelLab/source/op/kernels/cuda DIR_KERNEL_CUDA)
+aux_source_directory(KernelLab/source/op/kernels/ DIR_KERNEL)
+aux_source_directory(KernelLab/source/sampler DIR_SAMPLE)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
@@ -98,7 +98,7 @@ target_link_libraries(llama sentencepiece glog::glog gtest gtest_main pthread cu
 target_link_directories(llama PUBLIC ${CMAKE_CUDA_COMPILER_LIBRARY_ROOT}/lib64)
 
 target_include_directories(llama PUBLIC ${glog_INCLUDE_DIR})
-target_include_directories(llama PUBLIC ${PROJECT_SOURCE_DIR}/Engine/include)
+target_include_directories(llama PUBLIC ${PROJECT_SOURCE_DIR}/KernelLab/include)
 target_include_directories(llama PUBLIC ${Armadillo_INCLUDE_DIR})
 target_include_directories(llama PUBLIC ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 

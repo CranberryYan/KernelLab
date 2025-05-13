@@ -3,7 +3,7 @@
 
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);
-  google::InitGoogleLogging("YST_Engine");
+  google::InitGoogleLogging("YST_KernelLab");
   FLAGS_log_dir = "./log/";
   FLAGS_alsologtostderr = true;
 
