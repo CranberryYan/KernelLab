@@ -1,2 +1,0 @@
-# FFZ-LLM
-  Hello
