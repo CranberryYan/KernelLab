@@ -1,0 +1,35 @@
+一、WMMA 编程粒度: Warp 级别
+  一个完整的 MMA 操作需要 Warp 内所有的 32 个 threads 协同
+
+二、为什么不是 thread?
+  1. Tensor Core 的硬件设计:
+    每个 Tensor Core 指令能够再一个 Warp 上并行执行多个 FMA 运算, 必须由 Warp 内所有线程参与, 才能充分利用吞吐量
+  2. 指令级别同步:
+    WMMA API 底层对应的 PTX 指令(mma.sunc.aligned)都是 Warp 同步指令,
+  他们在同一个 Warp 内按 SIMD 模式执行, 线程见无需显式 __syncthreads(), 但必须避免 warp divengence
+  3. 协作加载/存储:
+    wmma::load_matrix_sync 与 wmma::store_matrix_sync 要求 Warp 内各线程从 Global or Shared 协作读取或协会一个 tile,
+  才能填满 fragment 并保证数据完整性
+
+三、wmma::fragment
+	// wmma::fill_fragment(C_frag, 0.0);
+	//	此处定义的 fragment 是该 warp 内共享的(类似与 smem, 是 block 内共享)
+	// C = alpha * A x B + beta * C
+	// wmma::accumulator: C
+  // WMMA_M, WMMA_N, WMMA_K: 每个小块, 要处理的 shape
+	// half: 精度(计算时)
+	// 当前 frag 中的值
+	wmma::fragment<wmma::accumulator, WMMA_M, WMMA_N, WMMA_K, half> C_frag;
+	wmma::fill_fragment(C_frag, 0.0);
+
+	// wmma::row_major:
+	//	fragemnt 模板的第6个参数 Layout 只在需要描述从/向内存加载(load_matrix_sync)
+	// 或存储(store_matrix_sync)时才生效, 而累加器(accumulator)不直接对应某种内存布局,
+	// 所以 C_frag 的 Layout 保持默认
+	wmma::fragment<
+		wmma::matrix_a, WMMA_M, WMMA_N, WMMA_K, half, wmma::row_major> A_frag;
+	wmma::fragment<
+		wmma::matrix_b, WMMA_M, WMMA_N, WMMA_K, half, wmma::row_major> B_frag;
+
+  fragment 中的 WMMA_M, WMMA_N, WMMA_K 是有限制的, 详见PDF
+  
