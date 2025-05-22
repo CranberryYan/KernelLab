@@ -44,8 +44,8 @@ def vector_add_host(x: torch.Tensor, y: torch.Tensor, out: torch.Tensor):
   return out
 
 if __name__ == "__main__":
-  x = torch.rand(512 * 2048, device='cuda')
-  y = torch.rand(512 * 2048, device='cuda')
+  x = torch.rand(512 * 1024, device='cuda')
+  y = torch.rand(512 * 1024, device='cuda')
   out = torch.empty_like(x)
 
   out = vector_add_host(x, y, out)

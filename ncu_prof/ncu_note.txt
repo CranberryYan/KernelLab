@@ -3,13 +3,16 @@
   1. Compute bound
     计算量 / 访存量 > GPU峰值算力 / GPU峰值带宽
     计算量 / GPU峰值算力 > 访存量 / GPU峰值带宽
+
   2. Memory bound
     计算量 / 访存量 < GPU峰值算力 / GPU峰值带宽
     计算量 / GPU峰值算力 < 访存量 / GPU峰值带宽
+
   3. Latency bound
     未优化好的 Kernel, 大部分之间都在等待数据搬运, Compute 和 Memory 未能互相掩盖
   一般以60%为阈值, 对应ncu中 GPUThroughput 的条形图, eg: add_kernel Compute: 3.72% Memory: 92.32 -> Memory bound
   如果这两个值都很低 -> Latency bound, 如果都很高 -> 计算量 / 访存量 约等于 GPU峰值算力 / GPU峰值带宽 -> SM 和 Memory 利用的都很满
+
   4. Roofline
     Point 在斜线上 -> Memory bound
     Point 在横线上 -> Compute bound
@@ -17,30 +20,40 @@
 
 二、Compute Workload Analysis
   1. IPC(instructions per clock)反映 Kernel 达到的算力
+
   2. Pipe util 反映整个 Kernel 执行周期(SM active cycles)中, 计算指令所占周期比例或者指令比例
     ALU FMA 达到75%以上, 才是比较理想的
 
 三、Memory Workload Analysis
   1. 90%以上的 Kernel 问题, 都在于 Memory 和 Latency
+
   2. Memory Throughput: Global Memory 的带宽
+
   3. Max Bandwidth: 带宽峰值利用率
+
   4. Mem busy: Memory 的利用率
     eg: Mem busy 很高, Memory Throughput 很低 ->
       Global Memory 没有连续且合并的访问, 跨着访问的, 所以很忙但是效率不高
+    
   5. 显示方式: Transfer Size: Bytes    Throughput: 带宽
               蓝色: 硬件概念   绿色: 软件概念
+
   6. DeviceMemory: <- load from DeviceMemory to L2
                    -> store from L2 to DeviceMemory
+
   7. L2 Cache: <- load from L2 to L1
                -> store from L1 to L2
+
   8. 重点关注:
     L2 Cache Hit Rate: 如果在 matmul 中, lhs 的每一行去乘 rhs 的每一列(复用), Hit Rate 就需要很高
       如果在 vec_add, 数据之间不需要复用, Hit Rate 可以比较低
+
   9. L1/TEX Cache
     Sectors per Req: 合并访存
     1 Sector = 32Bytes
     Unvec: 32Threads * 4Bytes = 128Bytes -> 4Sectors
     vec: 32Threads * 4Bytes * 4Ele = 512Bytes -> 16Sectors
+
   10. Shared Memory
     Bank conflicts = warp nums * 每warp冲突路数
     warp冲突路数:
@@ -50,24 +63,30 @@
   这是对调度器发出指令行为的总结, 每个调度器维护一个 Warp 池, 它可以从中选择 Warp 发出指令;
   Warp 池中 Warp 的上限 (称为理论 Warp 数(Theoretical Warps)) 由启动配置决定;
   每个时钟周期, 调度器都会检查其 Warp 池中已分配的 Warp 状态 (称为 活跃 Warp (Active Warps));
-其中未处于停滞状态(stalled)的 Warp 被称为 可发射 Warp(Eligible Warps), 这些 Warp 已准备好发出它们的下一条指令;
+  其中未处于停滞状态(stalled)的 Warp 被称为 可发射 Warp(Eligible Warps), 这些 Warp 已准备好发出它们的下一条指令;
   在所有可发射 Warp 中, 调度器选择其中一个 Warp 来发出一条或多条指令(已发射 Warp (Issued Warp));
-如果某个周期没有任何 Warp 处于可发射状态, 那么调度器会跳过该周期, 不发出任何指令 (称为 issue slot 被跳过);
-如果跳过的周期(Skipped Issue Slots) 过多, 说明指令发射槽利用率低(Issue Slot Utilization), 通常是延迟隐藏效果差的表现(Latency bound);
+  如果某个周期没有任何 Warp 处于可发射状态, 那么调度器会跳过该周期, 不发出任何指令 (称为 issue slot 被跳过);
+  如果跳过的周期(Skipped Issue Slots) 过多, 说明指令发射槽利用率低(Issue Slot Utilization), 通常是延迟隐藏效果差的表现(Latency bound);
 
   1. Warps Per Scheduler
     GPU Max Warps Per Scheduler: 12.0 GPU 自身参数, 每个调度器中最多有多少 warp 数
+
   2. Theoretical Warps Per Scheduler: 12.0 GPU 自身参数, 每个调度器最多能同时活跃的 warp 数
+
   3. No Eligible [%]	97.95
     不可用的 warp, 调度器维护了一堆 warp, 这里 warp 里有 97.95% 都不可用, 显然有问题;
   Active Warps Per Scheduler [warp]	9.75
     如果这个比较小 -> 分配的 block 太少了, 或者每个 block 中多塞点线程
+
   4. Eligible Warps Per Scheduler [warp]	0.02
     平均每个调度器只有 0.02 个 warp 是可以发射指令的 warp, 显然有问题
+
   5. Issued Warp Per Scheduler	0.02
     平均每个调度器只有 0.02 个 warp 发射一条或多条指令
+
   6. 综上: 每个调度器活跃的 warp 很多(9.75), 但是可以发射指令和已经发射指令的 warp 很少(0.02),
   大部分的 warp, 都在坐牢(等待访存 / 同步) -> Memory bound
+
   7. Issue Slot Utilization
     Eligible Warps Per Scheduler 和 Issued Warp Per Scheduler 比较烂原因在于 Issue Slot Utilization 比较低
     Issue Slot Utilization 比较低的原因在于:
@@ -80,6 +99,7 @@
       每个调度器可以同时维护 12 个 warp(Theoretical Warps Per Scheduler: 12.0), Issue Slots 会从这 12 个里面选
     (2) Issue Slots:
       每个 SM 里有多个调度器, 每个调度器在每个 cycle, 有一次机会发射一条指令, 这个机会就叫 issue slot
+
   8. Warp State Statistics
     1. Warp Stall 的原因(详见PPT):
       (1) Stall Not Selected: 没有 warp 可选 -> 分配更多的 Warp
@@ -95,6 +115,7 @@
       (3) Stall MIO Throttle: 内存 IO 限制导致的 warp stall, 多数出现在 bank conflicts
       (4) Stall long score board / LG throttle: 长延迟的操作依赖造成的 warp stall, 解决方法 -> 向量化访存
       (5) Stall short score board: 频繁短延迟操作依赖造成的停顿, 解决方法 -> 检查 smem 是否存在重复访问, 减少对 smem 的访问次数
+
   9. Occupancy(占有率)
     (1) 特点:
       (a) 越大不代表性能成比例的越好, 但是小了, 性能肯定不好
