@@ -151,6 +151,9 @@ def gemm_kernel(x_ptr, w_ptr, y_ptr, M, N, K,
     # w: [BLOCK_SIZE_N, BLOCK_SIZE_K](要在load时, 进行逻辑上的转置)
     #   [BLOCK_SIZE_K, BLOCK_SIZE_N]
     # y: [BLOCK_SIZE_M, BLOCK_SIZE_N]
+    # x_ptr + (m_offset[:, None] * K + k_offset[None, :] + k)
+    #   类似于燧原的全量配置
+    #   如果改成增量, 那么步长为BLOCK_SIZE_K
     x = x_ptr + (m_offset[:, None] * K + k_offset[None, :] + k)
     mask_x = (m_offset[:, None] < M) & (k_offset[None, :] + k < K)
     x_tile = tl.load(x, mask_x, other=0.0)

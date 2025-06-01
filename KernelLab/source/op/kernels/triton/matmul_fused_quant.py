@@ -96,7 +96,7 @@ def dequant_kernel(x_ptr, s_ptr, y_ptr, M, N,
   tl.store(y_ptr + offset, y, mask)
 
 def dequant_host(x: torch.Tensor, s: torch.Tensor,
-                          block_size: int = 128) -> torch.Tensor:
+                 block_size: int = 128) -> torch.Tensor:
   assert x.is_contiguous() and s.is_contiguous(), \
     'Input tensors must be contiguous'
   assert x.dim() == 2 and s.dim() == 2, 'Input tensors must have 2 dimensions'
@@ -125,13 +125,13 @@ fp16_gemm_configs = [
 @triton.autotune(configs=fp16_gemm_configs, key=['N', 'K'])
 @triton.jit
 def fp16_gemm_kernel(x_ptr, w_ptr, y_ptr,
-                    x_s_ptr, w_s_ptr,
-                    M,
-                    N: tl.constexpr,
-                    K: tl.constexpr,
-                    BLOCK_SIZE_M: tl.constexpr,
-                    BLOCK_SIZE_N: tl.constexpr,
-                    BLOCK_SIZE_K: tl.constexpr):
+                     x_s_ptr, w_s_ptr,
+                     M,
+                     N: tl.constexpr,
+                     K: tl.constexpr,
+                     BLOCK_SIZE_M: tl.constexpr,
+                     BLOCK_SIZE_N: tl.constexpr,
+                     BLOCK_SIZE_K: tl.constexpr):
   pid_m = tl.program_id(0)
   pid_n = tl.program_id(1)
   tile_k_num = tl.cdiv(K, BLOCK_SIZE_K)
@@ -167,6 +167,7 @@ def fp16_gemm_kernel(x_ptr, w_ptr, y_ptr,
 
     accumulator += tl.dot(x, w) * x_s[:, None] * w_s[None, :]
 
+    # 类似于燧原的增量配置(更好, 开销更小)
     x_ptrs += BLOCK_SIZE_K
     w_ptrs += BLOCK_SIZE_K
 
