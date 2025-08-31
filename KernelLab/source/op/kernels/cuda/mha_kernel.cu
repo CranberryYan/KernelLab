@@ -1,3 +1,4 @@
+#include <cfloat>
 #include <cub/cub.cuh>
 #include "mha_kernel.cuh"
 #include "tensor/tensor.h"
