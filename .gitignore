@@ -7,3 +7,7 @@ test/log/
 ncu_log/
 log.txt
 lib/
+*.so
+cuda_tutorial/cmake/
+cuda_tutorial/course1/hello
+lib/libllama.so
