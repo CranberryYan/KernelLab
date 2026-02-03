@@ -91,7 +91,7 @@
     Eligible Warps Per Scheduler 和 Issued Warp Per Scheduler 比较烂原因在于 Issue Slot Utilization 比较低
     Issue Slot Utilization 比较低的原因在于:
       每个调度器理论上每个 cycle 能发射一条指令, 调度器在每个 cycle 中尝试从 warp 池中挑一个 warp 发指令,
-    但你的 kernel 中, 每个调度器平均 48.8(1 / 0.02) 个周期才发出一条指令 -> 非常严重的 资源空转, 计算资源利用率极差
+    但你的 kernel 中, 每个调度器平均 48.8(1 / 0.02) 个周期才发出一条指令 -> 非常严重的资源空转, 计算资源利用率极差
       你的 kernel 中, Active Warps Per Scheduler [warp]	9.75, 略小于 Theoretical Warps Per Scheduler -> warp 数量还算充分
       但是, 只有 0.02 个 warp 是 ready(eligible) 状态 → warp 都在“坐牢”, 没法发指令 -> 这个周期相当于什么都没做, stall(卡在 memory/sync)
 
