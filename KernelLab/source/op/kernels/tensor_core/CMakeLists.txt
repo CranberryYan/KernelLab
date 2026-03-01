@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20.0)
 set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
 
 project(universe_cuda_best_practice VERSION 0.1.0 LANGUAGES CUDA CXX C)
-set(CMAKE_CUDA_ARCHITECTURES 86)
+set(CMAKE_CUDA_ARCHITECTURES 89)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

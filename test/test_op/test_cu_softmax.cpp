@@ -6,7 +6,7 @@
 #include "../include/op/softmax.h"
 #include "../source/op/kernels/kernels_interface.h"
 
-#if 0
+#if 1
 TEST(test_cpu_softmax, test_0_safe_and_online) {
   std::shared_ptr<base::CPUDeviceAllocator> alloc_cpu =
     base::CPUDeviceAllocatorFactory::get_instance();
@@ -59,6 +59,7 @@ TEST(test_cpu_softmax, test_0_safe_and_online) {
   }
 }
 
+#if 0
 TEST(test_cu_softmax, test_0_naive) {
   std::shared_ptr<base::CPUDeviceAllocator> alloc_cpu =
     base::CPUDeviceAllocatorFactory::get_instance();
@@ -132,36 +133,40 @@ TEST(test_cu_softmax, test_0_naive) {
     }
   }
 }
+#endif
 
-TEST(test_cu_softmax, test_0_safe) {
+#if 1
+void safe_softmax(unsigned int rows, unsigned int cols) {
   std::shared_ptr<base::CPUDeviceAllocator> alloc_cpu =
     base::CPUDeviceAllocatorFactory::get_instance();
   std::shared_ptr<base::CUDADeviceAllocator> alloc_cu =
     base::CUDADeviceAllocatorFactory::get_instance();
 
   int input_ele_num = 1;
-  std::vector<uint32_t> intput_dims = {4096, 128};
+  std::vector<uint32_t> intput_dims = {rows, cols};
   for (auto &dim : intput_dims) {
     input_ele_num *= dim;
   }
 
-  tensor::Tensor input_cpu(base::DataType::kDataTypeFp32, 4096, 128,
+  tensor::Tensor input_cpu(base::DataType::kDataTypeFp32, rows, cols,
     true, alloc_cpu, nullptr);
-  tensor::Tensor output_cpu(base::DataType::kDataTypeFp32, 4096, 128,
+  tensor::Tensor output_cpu(base::DataType::kDataTypeFp32, rows, cols,
     true, alloc_cpu, nullptr);
-  tensor::Tensor input_cu(base::DataType::kDataTypeFp32, 4096, 128,
+  tensor::Tensor input_cu(base::DataType::kDataTypeFp32, rows, cols,
     true, alloc_cu, nullptr);
-  tensor::Tensor output_cu(base::DataType::kDataTypeFp32, 4096, 128,
+  tensor::Tensor output_cu(base::DataType::kDataTypeFp32, rows, cols,
     true, alloc_cu, nullptr);
 
   std::random_device rd;
   std::mt19937 mt(rd());
-  std::uniform_real_distribution<float> dist_float(-5.f, 5.f);
+  std::uniform_real_distribution<float> dist_float(-10.f, 10.f);
   for (int i = 0; i < input_ele_num; ++i) {
     float input_tmp = dist_float(mt);
     input_cpu.set_value<float>(input_tmp, i);
-    input_cu.set_value<float>(input_tmp, i);
   }
+
+  input_cu = input_cpu.clone();
+  input_cu.to_cuda();
 
   std::shared_ptr<op::Layer> softmax_layer_cpu =
     std::make_shared<op::SoftmaxLayer>(base::DeviceType::kDeviceCPU);
@@ -201,12 +206,30 @@ TEST(test_cu_softmax, test_0_safe) {
       if (err_num > 20) {
         break;
       }
-      printf("index: %d, output_cpu: %f, output_cu: %f\n",
+      printf("ERROR index: %d, output_cpu: %f, output_cu: %f\n",
         i, output_cpu.at<float>(i), output_cu.at<float>(i));
     }
   }
 }
 
+TEST(test_cu_softmax, test_0_safe) {
+  #if 0
+  std::vector<unsigned int> N = {1, 2, 127, 255, 1025};
+  std::vector<unsigned int> C = {1, 5, 31, 511, 513, 4095, 8191, 8193, 16383, 16384, 16385};
+  for (auto n : N) {
+    for (auto c : C) {
+      safe_softmax(n, c);
+    }
+  }
+  #endif
+
+  #if 1
+  safe_softmax(4096, 16384);
+  #endif
+}
+#endif
+
+#if 0
 TEST(test_cu_softmax, test_0_online) {
   std::shared_ptr<base::CPUDeviceAllocator> alloc_cpu =
     base::CPUDeviceAllocatorFactory::get_instance();
@@ -280,4 +303,5 @@ TEST(test_cu_softmax, test_0_online) {
     }
   }
 }
+#endif
 #endif
