@@ -6,8 +6,9 @@
 namespace op {
 static const bool apiTraceEnabled = (std::getenv("api_trace") != nullptr);
 
-ReduceLayer::ReduceLayer(base::DeviceType device_type)
-    : Layer(device_type, LayerType::kLayerReduce, "Reduce") {
+ReduceLayer::ReduceLayer(base::DeviceType device_type, uint32_t reduce_mode)
+    : Layer(device_type, LayerType::kLayerReduce, "Reduce"),
+      reduce_mode_(reduce_mode) {
   reset_input_size(1);
   reset_output_size(1);
 }
@@ -43,10 +44,9 @@ base::Status ReduceLayer::compute() {
   auto output = this->get_output(0);
 
   para::reduce_para para;
+  para.reduce_mode = this->reduce_mode_;
   para.ele_num = static_cast<uint32_t>(input.size());
   para.after_reduce_num = static_cast<uint32_t>(output.size());
-  para.block_num = para.after_reduce_num;
-  para.thread_num = (para.ele_num + para.block_num - 1) / para.block_num;
 
   kernel::get_reduce_kernel(device_type_)(input, output, para,
                                           cuda_config_ ?

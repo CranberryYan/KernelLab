@@ -20,6 +20,8 @@ struct add_para : public para_base {
 };
 
 struct reduce_para : public para_base {
+  uint32_t reduce_mode;
+
   uint32_t bpe;
   uint32_t ele_num;
   uint32_t after_reduce_num;

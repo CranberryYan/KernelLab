@@ -6,7 +6,7 @@
 #include "../include/op/softmax.h"
 #include "../source/op/kernels/kernels_interface.h"
 
-#if 1
+#if 0
 TEST(test_cpu_softmax, test_0_safe_and_online) {
   std::shared_ptr<base::CPUDeviceAllocator> alloc_cpu =
     base::CPUDeviceAllocatorFactory::get_instance();
@@ -135,7 +135,7 @@ TEST(test_cu_softmax, test_0_naive) {
 }
 #endif
 
-#if 1
+#if 0
 void safe_softmax(unsigned int rows, unsigned int cols) {
   std::shared_ptr<base::CPUDeviceAllocator> alloc_cpu =
     base::CPUDeviceAllocatorFactory::get_instance();

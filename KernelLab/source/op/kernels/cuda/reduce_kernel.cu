@@ -12,6 +12,7 @@
 
 
 #include <cub/cub.cuh>
+#include "math_utils.cuh"
 #include "tensor/tensor.h"
 #include "reduce_kernel.cuh"
 #include "base/cuda_config.h"
@@ -153,6 +154,199 @@ __global__ void reduce_kernel_v3(const float* input, float* output) {
   __syncthreads();
 }
 
+template <typename T, uint32_t mode>
+struct ReduceOp;
+
+// mode=0: sum
+template <typename T>
+struct ReduceOp<T, 0> {
+  __device__ __forceinline__ static T identity() { return T(0); }
+  __device__ __forceinline__ static T apply(T a, T b) { return a + b; }
+};
+
+// mode=1: max
+template <>
+struct ReduceOp<float, 1> {
+  __device__ __forceinline__ static float identity() { return -INFINITY; }
+  __device__ __forceinline__ static float apply(float a, float b) { return fmaxf(a, b); }
+};
+template <>
+struct ReduceOp<int32_t, 1> {
+  __device__ __forceinline__ static int32_t identity() { return INT32_MIN; }
+  __device__ __forceinline__ static int32_t apply(int32_t a, int32_t b) { return (a > b) ? a : b; }
+};
+template <>
+struct ReduceOp<uint32_t, 1> {
+  __device__ __forceinline__ static uint32_t identity() { return 0u; }
+  __device__ __forceinline__ static uint32_t apply(uint32_t a, uint32_t b) { return (a > b) ? a : b; }
+};
+
+// mode=2: min
+template <>
+struct ReduceOp<float, 2> {
+  __device__ __forceinline__ static float identity() { return INFINITY; }
+  __device__ __forceinline__ static float apply(float a, float b) { return fminf(a, b); }
+};
+template <>
+struct ReduceOp<int32_t, 2> {
+  __device__ __forceinline__ static int32_t identity() { return INT32_MAX; }
+  __device__ __forceinline__ static int32_t apply(int32_t a, int32_t b) { return (a < b) ? a : b; }
+};
+template <>
+struct ReduceOp<uint32_t, 2> {
+  __device__ __forceinline__ static uint32_t identity() { return 0xFFFFFFFFu; }
+  __device__ __forceinline__ static uint32_t apply(uint32_t a, uint32_t b) { return (a < b) ? a : b; }
+};
+
+template<typename T, uint32_t reduce_mode>
+__device__ __forceinline__ T warp_reduce_v1(T val, unsigned mask) {
+  #pragma unroll
+  for (int stride = 16; stride >= 1; stride >>= 1) {
+    T other = __shfl_down_sync(mask, val, stride);
+    val = ReduceOp<T, reduce_mode>::apply(val, other);
+  }
+  return val;
+}
+
+template<typename T, uint32_t reduce_mode>
+__device__ __forceinline__ T block_reduce_v1(T val) {
+  uint32_t tid = threadIdx.x;
+  uint32_t lane = tid & 31;
+  uint32_t warp_id = tid >> 5;
+  uint32_t warp_num = (blockDim.x + 31) >> 5;
+
+  __shared__ T warp_sums[32];
+
+  uint32_t m = __activemask();
+  val = warp_reduce_v1<T, reduce_mode>(val, m);
+
+  if (lane == 0) warp_sums[warp_id] = val;
+  __syncthreads();
+
+  if (warp_id == 0) {
+    val = (lane < warp_num) ?
+          warp_sums[lane] :
+          ReduceOp<T, reduce_mode>::identity();
+    unsigned m0 = __activemask();
+    val = warp_reduce_v1<T, reduce_mode>(val, m0);
+  }
+  return val;
+}
+
+template<typename T, uint32_t reduce_mode>
+__global__ void reduce_kernel_v4(const T* __restrict__ input,
+                                 T* __restrict__ output,
+                                 unsigned int n) {
+  unsigned int tid = threadIdx.x;
+  unsigned int bid = blockIdx.x;
+  unsigned int gid = bid * blockDim.x + tid;
+  unsigned int thread_per_block = blockDim.x;
+
+  // 每个block处理两段连续区间
+  unsigned int offset = gid + bid * thread_per_block;
+
+  // 0: sum   1: max   2: min
+  T a = (offset < n)?
+        input[offset]:
+        ReduceOp<T, reduce_mode>::identity();
+  T b = (offset + thread_per_block < n) ?
+        input[offset + thread_per_block] :
+        ReduceOp<T, reduce_mode>::identity();
+  T val = ReduceOp<T, reduce_mode>::apply(a, b);
+
+  // block内归约
+  val = block_reduce_v1<T, reduce_mode>(val);
+
+  if (tid == 0) {
+    output[bid] = val;
+  }
+}
+
+#if 1
+template <typename T>
+static inline void launch_reduce(cudaStream_t s, dim3 grid, dim3 block,
+                                 const T* in, T* out, unsigned int n,
+                                 uint32_t reduce_mode) {
+  switch (reduce_mode) {
+    case 0: reduce_kernel_v4<T, 0><<<grid, block, 0, s>>>(in, out, n); break;
+    case 1: reduce_kernel_v4<T, 1><<<grid, block, 0, s>>>(in, out, n); break;
+    case 2: reduce_kernel_v4<T, 2><<<grid, block, 0, s>>>(in, out, n); break;
+    default: CHECK(false) << "Unsupported reduce_mode: " << reduce_mode;
+  }
+}
+
+template <typename T>
+void reduce_kernel_cu_typed(const tensor::Tensor& input,
+                            tensor::Tensor& output,
+                            para::reduce_para para,
+                            void* stream) {
+  CHECK_EQ(input.is_empty(), false);
+  CHECK_EQ(output.is_empty(), false);
+  CHECK_EQ(static_cast<int>(output.data_type()),
+           static_cast<int>(input.data_type()));
+
+  unsigned int res_N = para.after_reduce_num;
+  unsigned int cur_N = para.ele_num;
+
+  uint32_t thread_num;
+  if (cur_N <= 1024 * 256) thread_num = 256;
+  else if (cur_N <= 2048 * 512) thread_num = 512;
+  else thread_num = 1024;
+
+  CHECK_EQ(thread_num % 32, 0);
+  CHECK_LE(thread_num, 1024);
+
+  unsigned int max_ele_tmp = math_cu::CeilDiv<uint32_t>(cur_N, 2 * thread_num);
+
+  T* d_tmp1 = nullptr;
+  T* d_tmp2 = nullptr;
+  cudaMalloc(&d_tmp1, max_ele_tmp * sizeof(T));
+  cudaMalloc(&d_tmp2, max_ele_tmp * sizeof(T));
+
+  const T* in = input.ptr<T>();
+  T* out = d_tmp1;
+
+  cudaStream_t stream_ = stream ? reinterpret_cast<cudaStream_t>(stream) : 0;
+
+  while (cur_N > res_N) {
+    uint32_t block_num = math_cu::CeilDiv<uint32_t>(cur_N, 2 * thread_num);
+    dim3 grid(block_num);
+    dim3 block(thread_num);
+
+    launch_reduce<T>(stream_, grid, block, in, out, cur_N, para.reduce_mode);
+
+    cur_N = block_num;
+    in = out;
+    out = (out == d_tmp1) ? d_tmp2 : d_tmp1;
+  }
+
+  cudaMemcpyAsync(output.ptr<T>(), in, res_N * sizeof(T),
+                  cudaMemcpyDeviceToDevice, stream_);
+
+  cudaFree(d_tmp1);
+  cudaFree(d_tmp2);
+}
+
+void reduce_kernel_cu(const tensor::Tensor& input,
+                      tensor::Tensor& output,
+                      para::reduce_para para,
+                      void* stream) {
+  switch (input.data_type()) {
+    case base::DataType::kDataTypeFp32:
+      reduce_kernel_cu_typed<float>(input, output, para, stream);
+      break;
+    case base::DataType::kDataTypeInt32:
+      reduce_kernel_cu_typed<int32_t>(input, output, para, stream);
+      break;
+    case base::DataType::kDataTypeUInt32:
+      reduce_kernel_cu_typed<uint32_t>(input, output, para, stream);
+      break;
+    default:
+      CHECK(false) << "Unsupported data type: " << int(input.data_type());
+  }
+}
+
+#if 0
 void reduce_kernel_cu(const tensor::Tensor &input,
                       tensor::Tensor &output,
                       para::reduce_para para,
@@ -160,19 +354,95 @@ void reduce_kernel_cu(const tensor::Tensor &input,
   CHECK_EQ(input.is_empty(), false);
   CHECK_EQ(output.is_empty(), false);
 
-  int32_t thread_num = para.thread_num;
-  int32_t block_num = para.block_num;
+  unsigned int res_N = para.after_reduce_num;
+  unsigned int cur_N = para.ele_num;
 
-  dim3 grid(block_num);
-  dim3 block(thread_num);
+  uint32_t thread_num = 256;
+  uint32_t block_num = math_cu::CeilDiv<uint32_t>(cur_N, 2*thread_num);
+  if (cur_N <= 256 * 1024) thread_num = 256;
+  else if (cur_N <= 1024 * 1024) thread_num = 512;
+  else thread_num = 1024;
+  block_num = math_cu::CeilDiv<uint32_t>(cur_N, 2*thread_num);
+  printf("block_num: %d, thread_num: %d\n", block_num, thread_num);
+
+  unsigned int max_ele_tmp = math_cu::CeilDiv<uint32_t>(cur_N, 2*thread_num);
+  printf("res_N: %d, cur_N: %d\n", res_N, cur_N);
+
+  if (input.data_type() == base::DataType::kDataTypeFp32) {
+    T = DataTypeToCppT<base::DataType::kDataTypeFp32>;
+  } else if (input.data_type() == base::DataType::kDataTypeInt32) {
+    T = DataTypeToCppT<base::DataType::kDataTypeInt32>;
+  } else if (input.data_type() == base::DataType::kDataTypeUInt32) {
+    T = DataTypeToCppT<base::DataType::kDataTypeUInt32>;
+  }
+
+  T* d_tmp1 = nullptr;
+  T* d_tmp2 = nullptr;
+  cudaMalloc(&d_tmp1, max_ele_tmp * sizeof(T));
+  cudaMalloc(&d_tmp2, max_ele_tmp * sizeof(T));
+
+  const T* in = input.ptr<T>();
+  T* out = d_tmp1;
 
   if (stream) {
     cudaStream_t stream_ = static_cast<CUstream_st*>(stream);
-    reduce_kernel_v3<<<grid, block, thread_num * sizeof(float), stream_>>>(
-      input.ptr<float>(), output.ptr<float>());
+    while (cur_N > res_N) {
+      block_num = math_cu::CeilDiv<uint32_t>(cur_N, 2*thread_num);
+      printf("while block_num: %d, thread_num: %d\n", block_num, thread_num);
+
+      CHECK_EQ(thread_num % 32, 0);
+      CHECK_LE(thread_num, 1024);
+
+      dim3 grid(block_num);
+      dim3 block(thread_num);
+      if (para.reduce_mode == 0) {
+        reduce_kernel_v4<T, 0><<<grid, block, 0, stream_>>>(
+          in, out, cur_N);
+      } else if (para.reduce_mode == 1) {
+        reduce_kernel_v4<T, 1><<<grid, block, 0, stream_>>>(
+          in, out, cur_N);
+      } else if (para.reduce_mode == 2) {
+        reduce_kernel_v4<T, 2><<<grid, block, 0, stream_>>>(
+          in, out, cur_N);
+      }
+
+      cur_N = block_num;
+      in = out;
+      out = (out == d_tmp1) ? d_tmp2 : d_tmp1;
+    }
+    // 最终结果在 in[0..res_N-1]，拷回 output tensor
+    cudaMemcpyAsync(output.ptr<T>(), in, res_N * sizeof(T),
+                    cudaMemcpyDeviceToDevice, stream_);
   } else {
-    reduce_kernel_v3<<<grid, block, thread_num * sizeof(float)>>>(
-      input.ptr<float>(), output.ptr<float>());
+    while (cur_N > res_N) {
+      block_num = math_cu::CeilDiv<uint32_t>(cur_N, 2*thread_num);
+      printf("while block_num: %d, thread_num: %d\n", block_num, thread_num);
+
+      CHECK_EQ(thread_num % 32, 0);
+      CHECK_LE(thread_num, 1024);
+
+      dim3 grid(block_num);
+      dim3 block(thread_num);
+      if (para.reduce_mode == 0) {
+        reduce_kernel_v4<T, 0><<<grid, block>>>(in, out, cur_N);
+      } else if (para.reduce_mode == 1) {
+        reduce_kernel_v4<T, 1><<<grid, block>>>(in, out, cur_N);
+      } else if (para.reduce_mode == 2) {
+        reduce_kernel_v4<T, 2><<<grid, block>>>(in, out, cur_N);
+      }
+
+      cur_N = block_num;
+      in = out;
+      out = (out == d_tmp1) ? d_tmp2 : d_tmp1;
+    }
+    // 最终结果在 in[0..res_N-1]，拷回 output tensor
+    cudaMemcpyAsync(output.ptr<T>(), in, res_N * sizeof(T),
+                    cudaMemcpyDeviceToDevice);
   }
+
+  cudaFree(d_tmp1);
+  cudaFree(d_tmp2);
 }
+#endif
+#endif
 } // namespace kernel
