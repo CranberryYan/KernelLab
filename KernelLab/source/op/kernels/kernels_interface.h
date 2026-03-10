@@ -97,12 +97,18 @@ typedef void (*SoftmaxKernel)(const tensor::Tensor& input,
                               void* stream);
 SoftmaxKernel get_softmax_kernel(base::DeviceType device_type);
 
-typedef void (*IndexAddernel)(const tensor::Tensor& input,
-                              const tensor::Tensor& index,
-                              const tensor::Tensor& source,
-                              tensor::Tensor& output,
-                              para::index_add_para para,
-                              void* stream);
-IndexAddernel get_index_add_kernel(base::DeviceType device_type);
+typedef void (*IndexAddKernel)(const tensor::Tensor& input,
+                               const tensor::Tensor& index,
+                               const tensor::Tensor& source,
+                               tensor::Tensor& output,
+                               para::index_add_para para,
+                               void* stream);
+IndexAddKernel get_index_add_kernel(base::DeviceType device_type);
+
+typedef void (*HistogramKernel)(const tensor::Tensor& input,
+                                tensor::Tensor& output,
+                                para::histogram_para para,
+                                void* stream);
+HistogramKernel get_histogram_kernel(base::DeviceType device_type);
 } // namespace kernel
 #endif // KERNELS_INTERFACE_H

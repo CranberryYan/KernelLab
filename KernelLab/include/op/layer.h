@@ -22,7 +22,8 @@ enum class LayerType : uint8_t {
   kLayerSwiGLU = 10,
   kLayerReduce = 11,
   kLayerScatter = 12,
-  kLayerIndexAdd = 13
+  kLayerIndexAdd = 13,
+  kLayerHistogram = 14
 };
 
 class BaseLayer {
@@ -98,7 +99,13 @@ protected: // 派生类可以访问, 外部无法访问
 
 class Layer : public BaseLayer {
 public:
-  explicit Layer(base::DeviceType devcie_type, LayerType layer_type,
+  explicit Layer(base::DeviceType devcie_type,
+                 LayerType layer_type,
+                 std::string layer_name = "");
+
+  explicit Layer(base::DeviceType devcie_type,
+                 LayerType layer_type,
+                 base::DataType data_type,
                  std::string layer_name = "");
 
   base::Status init() override;
@@ -108,10 +115,10 @@ public:
                             base::DataType data_type) const;
 
   base::Status check_tensor_with_dim(const tensor::Tensor& tensor,
-                                            base::DeviceType device_type,
-                                            base::DataType data_type,
-                                            ...) const;
-  
+                                     base::DeviceType device_type,
+                                     base::DataType data_type,
+                                     ...) const;
+
   base::Status checkArgs() const override;
 
   base::Status forward() override;

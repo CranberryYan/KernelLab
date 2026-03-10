@@ -25,6 +25,8 @@
 #include "cuda/softmax_kernel.cuh"
 #include "cpu/index_add_kernel.h"
 #include "cuda/index_add_kernel.cuh"
+#include "cpu/histogram_kernel.h"
+#include "cuda/histogram_kernel.cuh"
 
 namespace kernel {
 RMSNormKernel get_rmsnorm_kernel(base::DeviceType device_type) {
@@ -152,13 +154,23 @@ SoftmaxKernel get_softmax_kernel(base::DeviceType device_type) {
   return nullptr;
 }
 
-IndexAddernel get_index_add_kernel(base::DeviceType device_type) {
+IndexAddKernel get_index_add_kernel(base::DeviceType device_type) {
   if (device_type == base::DeviceType::kDeviceCPU) {
     return index_add_kernel_cpu;
   } else if (device_type == base::DeviceType::kDeviceCUDA) {
     return index_add_kernel_cu;
   }
   LOG(FATAL) << "Unknown device type for get an index_add kernel.";
+  return nullptr;
+}
+
+HistogramKernel get_histogram_kernel(base::DeviceType device_type) {
+  if (device_type == base::DeviceType::kDeviceCPU) {
+    return histogram_kernel_cpu;
+  } else if (device_type == base::DeviceType::kDeviceCUDA) {
+    return histogram_kernel_cu;
+  }
+  LOG(FATAL) << "Unknown device type for get an histogram kernel.";
   return nullptr;
 }
 } // namespace kernel

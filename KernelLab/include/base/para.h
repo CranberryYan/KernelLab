@@ -102,5 +102,12 @@ struct index_add_para : public para_base {
 
   EnflameDevice enflame_device;
 };
+
+struct histogram_para : public para_base {
+  int32_t low;
+  int32_t high;
+
+  int32_t ele_num;
+};
 } // namespace para
 #endif // KERNELLAB_INCLUDE_PARA_H_

@@ -6,7 +6,7 @@
 #include "../include/op/reduce.h"
 #include "../source/op/kernels/kernels_interface.h"
 
-#if 1
+#if 0
 void reduce(unsigned int rows, unsigned int cols, unsigned int reduce_mode) {
   std::shared_ptr<base::CPUDeviceAllocator> alloc_cpu =
     base::CPUDeviceAllocatorFactory::get_instance();
