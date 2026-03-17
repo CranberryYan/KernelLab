@@ -15,7 +15,6 @@
 #include "math_utils.cuh"
 #include "tensor/tensor.h"
 #include "reduce_kernel.cuh"
-#include "base/cuda_config.h"
 
 namespace kernel {
 __global__ void reduce_kernel_v0(const float* input, float* output) {

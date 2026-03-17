@@ -12,3 +12,7 @@ cuda_tutorial/cmake/
 cuda_tutorial/course1/hello
 lib/libllama.so
 *.ncu-rep
+.clangd
+.cache
+cmake
+Enflame/

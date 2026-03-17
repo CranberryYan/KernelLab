@@ -1,6 +1,4 @@
-#include <chrono>
-#include <random>
-#include <iostream>
+#include <cstdio>
 #include <cuda_runtime.h>
 
 // shuffle

@@ -2,9 +2,6 @@
 #define KERNELLAB_INCLUDE_MODEL_LLAMA_H_
 #include <base/cuda_config.h>
 #include "model.h"
-#include "op/add.h"
-#include "op/rope.h"
-#include "op/swiglu.h"
 #include "op/embedding.h"
 
 namespace model {

@@ -2,10 +2,11 @@
 #include <glog/logging.h>
 #include <cuda_runtime_api.h>
 #include <sentencepiece_processor.h>
-#include "base/tick.h"
 #include "model/llama2.h"
 #include "op/mha.h"
 #include "op/rope.h"
+#include "op/add.h"
+#include "op/swiglu.h"
 #include "op/matmul.h"
 #include "op/rmsnorm.h"
 #include "../op/kernels/cpu/rope_kernel.h"

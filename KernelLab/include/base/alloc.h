@@ -2,6 +2,7 @@
 #define KERNELLAB_INCLUDE_BASE_ALLOC_H_
 #include <map>
 #include <memory>
+#include <vector>
 #include "base.h"
 
 namespace base {

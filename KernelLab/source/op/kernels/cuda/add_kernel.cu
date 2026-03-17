@@ -44,12 +44,12 @@ void add_kernel_cu(const tensor::Tensor& input1,
                    tensor::Tensor& output,
                    para::add_para para,
                    void* stream) {
-  CHECK_EQ(input1.is_empty(), false);
-  CHECK_EQ(input2.is_empty(), false);
-  CHECK_EQ(output.is_empty(), false);
+  CHECK(!input1.is_empty());
+  CHECK(!input2.is_empty());
+  CHECK(!output.is_empty());
 
-  CHECK_EQ(input1.size(), input2.size());
-  CHECK_EQ(input1.size(), output.size());
+  CHECK(input1.size() == input2.size());
+  CHECK(input1.size() == output.size());
 
   int32_t ele_num = para.ele_num;
   int32_t thread_num = para.thread_num;
