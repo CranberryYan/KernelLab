@@ -511,11 +511,9 @@ __global__ void safe_softmax_forward_GPU_v4(float* __restrict__ out,
       int stride = blockDim.x;
       float tile_sum_tmp = 0.0f;
       const float* in_row_tile = in_row + t * tile_elems;
-      float* out_row_tile = out_row + t * tile_elems;
       int tile_cols = min(tile_elems, C - t*tile_elems);
       if (aligned16_in && aligned16_out) {
         const float4* in_row4 = reinterpret_cast<const float4*>(in_row_tile);
-        float4* out_row4 = reinterpret_cast<float4*>(out_row_tile);
         int C4 = tile_cols >> 2;
 
         if constexpr (is_tile) {
@@ -761,12 +759,12 @@ int main() {
     size_t smem_size = align_up(bytes, 16);
     printf("smem_size: %ld\n", smem_size);
     cudaFuncSetAttribute(
-        safe_softmax_forward_GPU_v4<true>,   // 或 <true>，看你要设置哪个实例
+        safe_softmax_forward_GPU_v4<true>,
         cudaFuncAttributeMaxDynamicSharedMemorySize,
         (int)smem_size
     );
     cudaFuncSetAttribute(
-        safe_softmax_forward_GPU_v4<false>,   // 或 <true>，看你要设置哪个实例
+        safe_softmax_forward_GPU_v4<false>,
         cudaFuncAttributeMaxDynamicSharedMemorySize,
         (int)smem_size
     );

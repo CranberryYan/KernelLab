@@ -24,13 +24,13 @@ __global__ void swiglu_kernel(int size,
 
 void swiglu_kernel_cu(const tensor::Tensor& input1, const tensor::Tensor& input2,
                       tensor::Tensor& output, void* stream) {
-  CHECK_EQ(input1.is_empty(), false);
+  CHECK(!input1.is_empty());
   CHECK(input1.device_type() == base::DeviceType::kDeviceCUDA);
 
-  CHECK_EQ(input2.is_empty(), false);
+  CHECK(!input2.is_empty());
   CHECK(input2.device_type() == base::DeviceType::kDeviceCUDA);
 
-  CHECK_EQ(output.is_empty(), false);
+  CHECK(!output.is_empty());
   CHECK(output.device_type() == base::DeviceType::kDeviceCUDA);
 
   int size = static_cast<int32_t>(input1.size());

@@ -1,7 +1,6 @@
 #include <cub/cub.cuh>
 #include "math_utils.cuh"
 #include "tensor/tensor.h"
-#include "base/cuda_config.h"
 #include "histogram_kernel.cuh"
 
 #define CUDA_CHECK(call) do {                                      \

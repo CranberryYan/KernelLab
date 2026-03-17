@@ -1,6 +1,6 @@
-#include "tensor/tensor.h"
+#include "base/alloc.h"
 #include "argmax_kernel.cuh"
-#include "../kernels_interface.h"
+#include <cuda_runtime_api.h>
 
 namespace kernel {
 __forceinline__ __device__

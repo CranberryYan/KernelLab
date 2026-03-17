@@ -1,7 +1,6 @@
 #include "tensor/tensor.h"
 #include <cub/block/block_reduce.cuh>
 #include "matmul_kernel.cuh"
-#include "../kernels_interface.h"
 
 namespace kernel
 {
