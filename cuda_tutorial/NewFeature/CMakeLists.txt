@@ -1,0 +1,14 @@
+add_executable(TensorCore_demo TensorCore.cu)
+target_link_libraries(TensorCore_demo PRIVATE CUDA::cudart CUDA::cublas)
+
+add_executable(TensorCore_explicit_wmma_demo TensorCore_explicit_wmma.cu)
+target_link_libraries(TensorCore_explicit_wmma_demo PRIVATE CUDA::cudart)
+
+add_executable(AsyncGlobalToShared_demo AsyncGlobalToShared_demo.cu)
+target_link_libraries(AsyncGlobalToShared_demo PRIVATE CUDA::cudart)
+
+add_executable(ThreadBlockCluster_demo ThreadBlockCluster_demo.cu)
+target_link_libraries(ThreadBlockCluster_demo PRIVATE CUDA::cudart)
+
+add_executable(Ampere_PTX_ISA_showcase Ampere_PTX_ISA_showcase.cu)
+target_link_libraries(Ampere_PTX_ISA_showcase PRIVATE CUDA::cudart)
