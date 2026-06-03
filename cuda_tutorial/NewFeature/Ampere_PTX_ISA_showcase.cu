@@ -1,6 +1,8 @@
+#include <vector>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
+
 #include <mma.h>
 #include <cuda_fp16.h>
 #include <cuda_runtime.h>

@@ -6,7 +6,7 @@
 #include "../include/op/index_add.h"
 #include "../source/op/kernels/kernels_interface.h"
 
-#if 0
+#if 1
 // shape与deepseek对齐
 //  target: cols为7168   rows: {2, 250, 1024}
 //  index: rows * 8 -> {16, 4000, 8192}
