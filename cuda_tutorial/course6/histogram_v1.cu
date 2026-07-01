@@ -7,15 +7,27 @@
 
 #include <cuda_runtime.h>
 
-__global__ void histogram(int* input, int* hist, int n, int low, int high) {
-  int thread_num = gridDim.x * blockDim.x;
-  int gid = blockIdx.x * blockDim.x + threadIdx.x;
-  for (int i = gid; i < n; i += thread_num) {
-    int val = input[i];
+// block: 512
+// thread: 512
+#define GRID_SIZE 512
+#define BLOCK_SIZE 512
+__global__ void histogram_v1(int* input, int* hist, int n, int low, int high) {
+  __shared__ int tile[BLOCK_SIZE];
+
+  int bid = blockIdx.x;
+  int tid = threadIdx.x;
+
+  for (int tile_start = bid * BLOCK_SIZE; 
+       tile_start < n; tile_start += gridDim.x * BLOCK_SIZE) {
+    int gid = tile_start + tid;
+    tile[tid] = (gid < n) ? input[gid] : low - 1;
+    __syncthreads();
+
+    int val = tile[tid];
     if (val >= low && val < high) {
-      val -= low;
-      atomicAdd(&hist[val], 1);
+      atomicAdd(&hist[val - low], 1);  // ← 这才是瓶颈, 需要 shared memory 私有化
     }
+    __syncthreads();
   }
 }
 
@@ -66,11 +78,11 @@ int main() {
   const int block_size = 512;
 
   // ---------- CSV 文件 ----------
-  std::ofstream csv_file("./course6/histogram_benchmark.csv");
+  std::ofstream csv_file("./course6/histogram_v1_benchmark.csv");
   csv_file << "N,Length,GPU_Time_ms,Bandwidth_GBs,ErrorCount,Pass" << std::endl;
 
   std::cout << "========================================" << std::endl;
-  std::cout << "Histogram Benchmark" << std::endl;
+  std::cout << "histogram_v1 Benchmark" << std::endl;
   std::cout << "========================================" << std::endl;
 
   for (const auto& cfg : configs) {
@@ -118,7 +130,7 @@ int main() {
 
       for (int i = 0; i < N; ++i) {
         if (dist_oob_ratio(rng) < 0.1f) {
-          h_input[i] = dist_oob(rng); // 越界值, 不应被计入 histogram
+          h_input[i] = dist_oob(rng); // 越界值, 不应被计入 histogram_v1
         } else {
           h_input[i] = dist(rng);
         }
@@ -141,7 +153,7 @@ int main() {
       for (int w = 0; w < warmup_time; ++w) {
         checkCudaError(cudaMemset(d_hist, 0, hist_bytes),
                        "cudaMemset(warmup) failed");
-        histogram<<<grid_size, block_size>>>(d_input, d_hist, N, low, high);
+        histogram_v1<<<grid_size, block_size>>>(d_input, d_hist, N, low, high);
       }
       cudaDeviceSynchronize();
       checkCudaError(cudaGetLastError(), "Warmup kernel failed");
@@ -152,7 +164,7 @@ int main() {
                        "cudaMemset(repeat) failed");
         checkCudaError(cudaEventRecord(start),
                        "cudaEventRecord(start) failed");
-        histogram<<<grid_size, block_size>>>(d_input, d_hist, N, low, high);
+        histogram_v1<<<grid_size, block_size>>>(d_input, d_hist, N, low, high);
         checkCudaError(cudaEventRecord(stop),
                        "cudaEventRecord(stop) failed");
         checkCudaError(cudaEventSynchronize(stop),
@@ -233,7 +245,7 @@ int main() {
   csv_file.close();
   std::cout << "\n========================================" << std::endl;
   std::cout << "Benchmark completed. Results -> "
-               "course6/histogram_benchmark.csv" << std::endl;
+               "course6/histogram_v1_benchmark.csv" << std::endl;
   std::cout << "========================================" << std::endl;
 
   return 0;

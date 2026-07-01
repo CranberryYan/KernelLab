@@ -1,2 +1,11 @@
 add_executable(histogram histogram.cu)
+add_executable(histogram_v1 histogram_v1.cu)
+add_executable(histogram_v2 histogram_v2.cu)
+add_executable(histogram_v3 histogram_v3.cu)
+add_executable(histogram_v5 histogram_v5.cu)
+
 target_link_libraries(histogram PRIVATE ${CUDA_LIBRARIES})
+target_link_libraries(histogram_v1 PRIVATE ${CUDA_LIBRARIES})
+target_link_libraries(histogram_v2 PRIVATE ${CUDA_LIBRARIES})
+target_link_libraries(histogram_v3 PRIVATE ${CUDA_LIBRARIES})
+target_link_libraries(histogram_v5 PRIVATE ${CUDA_LIBRARIES})
